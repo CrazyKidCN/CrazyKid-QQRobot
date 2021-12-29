@@ -1,14 +1,17 @@
 package cn.crazykid.qqrobot
 
-import cc.moecraft.icq.command.interfaces.IcqCommand
-import cc.moecraft.icq.event.IcqListener
-import kotlin.jvm.JvmStatic
 import cc.moecraft.icq.PicqBotX
 import cc.moecraft.icq.PicqConfig
+import cc.moecraft.icq.command.interfaces.IcqCommand
+import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.logger.environments.ColorSupportLevel
-import cn.crazykid.qqrobot.Starter
+import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
 
-object Starter {
+
+@SpringBootApplication
+open class Starter : CommandLineRunner {
     /**
      * 要注册的指令
      */
@@ -19,11 +22,7 @@ object Starter {
      */
     private val listeners = arrayOf<IcqListener>()
 
-    /**
-     * bot后端启动入口方法
-     */
-    @JvmStatic
-    fun main(args: Array<String>) {
+    override fun run(vararg args: String?) {
         // 创建机器人对象 ( 传入配置 )
         val bot = PicqBotX(
             PicqConfig(31092)
@@ -40,8 +39,8 @@ object Starter {
                 .setApiRateLimited(false) // 是否启用限速调用API (需要enable_rate_limited_actions=true
                 .setApiAsync(false) // 是否异步调用API
                 .setCommandArgsSplitRegex(" ") // 解析指令的时候用来分割参数的正则
-                .setSecret("") // SHA1 验证秘钥 (设置为空就是不验证)
-                .setAccessToken("") // Access Token 访问令牌 (设置为空就是不用令牌)
+                .setSecret("woaifengkuang") // SHA1 验证秘钥 (设置为空就是不验证)
+                .setAccessToken("woaifengkuang") // Access Token 访问令牌 (设置为空就是不用令牌)
                 .setColorSupportLevel(ColorSupportLevel.FORCED) // Logger颜色支持级别 (设为DISABLED就没有颜色了)
                 .setLogPath("logs") // Logger日志路径 (设为空就不输出文件了)
                 .setLogFileName("PicqBotX-Log") // Logger日志文件名
@@ -49,7 +48,7 @@ object Starter {
         )
 
         // 添加一个机器人账户 ( 名字, 发送URL, 发送端口 )
-        bot.addAccount("Bot01", "127.0.0.1", 5700)
+        bot.addAccount("Bot01", "127.0.0.1", 5701)
 
         // 启用HyExp ( 非必要 )
         bot.setUniversalHyExpSupport(true)
@@ -78,4 +77,8 @@ object Starter {
         // 启动机器人, 不会占用主线程
         bot.startBot()
     }
+}
+
+fun main(args: Array<String>) {
+    runApplication<Starter>(*args)
 }
