@@ -1,0 +1,81 @@
+package cn.crazykid.qqrobot
+
+import cc.moecraft.icq.command.interfaces.IcqCommand
+import cc.moecraft.icq.event.IcqListener
+import kotlin.jvm.JvmStatic
+import cc.moecraft.icq.PicqBotX
+import cc.moecraft.icq.PicqConfig
+import cc.moecraft.logger.environments.ColorSupportLevel
+import cn.crazykid.qqrobot.Starter
+
+object Starter {
+    /**
+     * 要注册的指令
+     */
+    private val commands = arrayOf<IcqCommand>()
+
+    /**
+     * 要注册的监听器
+     */
+    private val listeners = arrayOf<IcqListener>()
+
+    /**
+     * bot后端启动入口方法
+     */
+    @JvmStatic
+    fun main(args: Array<String>) {
+        // 创建机器人对象 ( 传入配置 )
+        val bot = PicqBotX(
+            PicqConfig(31092)
+                .setDebug(false) // 是否输出debug信息
+                .setNoVerify(false) // 是否跳过酷Q版本验证 (不推荐)
+                .setCommandsAlsoCallEvents(true) // 指令是否触发消息事件
+                .setUseAsyncCommands(true) // 是否异步执行指令
+                .setMaintenanceMode(false) // 是否启用维护模式
+                .setMaintenanceResponse("bot维护中") // 维护模式回复 (设为空就不会回复了)
+                .setAutoMultiAccountOptimizations(true) // 是否自动判断是否开启多账号优化
+                .setMultiAccountOptimizations(true) // 不自动判断的时候是否手动开启多账号优化
+                .setEventPaused(false) // 是否暂停事件
+                .setHttpPaused(false) // 是否暂停HTTP接收
+                .setApiRateLimited(false) // 是否启用限速调用API (需要enable_rate_limited_actions=true
+                .setApiAsync(false) // 是否异步调用API
+                .setCommandArgsSplitRegex(" ") // 解析指令的时候用来分割参数的正则
+                .setSecret("") // SHA1 验证秘钥 (设置为空就是不验证)
+                .setAccessToken("") // Access Token 访问令牌 (设置为空就是不用令牌)
+                .setColorSupportLevel(ColorSupportLevel.FORCED) // Logger颜色支持级别 (设为DISABLED就没有颜色了)
+                .setLogPath("logs") // Logger日志路径 (设为空就不输出文件了)
+                .setLogFileName("PicqBotX-Log") // Logger日志文件名
+                .setLogInit(true) // 是否输出启动日志
+        )
+
+        // 添加一个机器人账户 ( 名字, 发送URL, 发送端口 )
+        bot.addAccount("Bot01", "127.0.0.1", 5700)
+
+        // 启用HyExp ( 非必要 )
+        bot.setUniversalHyExpSupport(true)
+
+        // 设置异步
+        bot.config.isUseAsyncCommands = true
+
+        // 注册事件监听器, 可以注册多个监听器
+        bot.eventManager.registerListeners(*listeners)
+
+        // 在没有Debug的时候加上这个消息日志监听器
+        //if (!bot.getConfig().isDebug())
+        //   bot.getEventManager().registerListener(new SimpleTextLoggingListener());
+
+        // 启用指令管理器
+        // 这些字符串是指令前缀, 比如指令"!help"的前缀就是"!"
+        bot.enableCommandManager("!", "/", "！", ".")
+
+        // 注册指令
+        // 从 v3.0.1.730 之后不会自动注册指令了, 因为效率太低 (≈4000ms), 而且在其他框架上有Bug
+        bot.commandManager.registerCommands(*commands)
+
+        // Debug输出所有已注册的指令
+        bot.logger.debug(bot.commandManager.commands.toString())
+
+        // 启动机器人, 不会占用主线程
+        bot.startBot()
+    }
+}
