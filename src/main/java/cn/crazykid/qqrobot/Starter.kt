@@ -5,12 +5,14 @@ import cc.moecraft.icq.PicqConfig
 import cc.moecraft.icq.command.interfaces.IcqCommand
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.logger.environments.ColorSupportLevel
+import org.mybatis.spring.annotation.MapperScan
 import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 
 
 @SpringBootApplication
+@MapperScan(value = ["cn.crazykid.qqrobot.mapper"])
 open class Starter : CommandLineRunner {
     /**
      * 要注册的指令
@@ -48,7 +50,12 @@ open class Starter : CommandLineRunner {
         )
 
         // 添加一个机器人账户 ( 名字, 发送URL, 发送端口 )
-        bot.addAccount("Bot01", "127.0.0.1", 5701)
+        try {
+            bot.addAccount("Bot01", "127.0.0.1", 5701)
+        } catch (e: Exception) {
+            bot.logger.error("添加机器人账户失败", e)
+            return
+        }
 
         // 启用HyExp ( 非必要 )
         bot.setUniversalHyExpSupport(true)
@@ -80,5 +87,5 @@ open class Starter : CommandLineRunner {
 }
 
 fun main(args: Array<String>) {
-    runApplication<Starter>(*args)
+    SpringApplication.run(Starter::class.java, *args)
 }

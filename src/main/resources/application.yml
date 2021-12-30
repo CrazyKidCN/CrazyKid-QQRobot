@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: CrazyKid's QQRobot Backend
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/dbName?characterEncoding=UTF8&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false&useSSL=false&allowMultiQueries=true
+    driverClassName: com.mysql.jdbc.Driver
+    username: root
+    password: root
+  main:
+    banner-mode: off
