@@ -5,6 +5,9 @@ import cc.moecraft.icq.PicqConfig
 import cc.moecraft.icq.command.interfaces.IcqCommand
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.logger.environments.ColorSupportLevel
+import cn.crazykid.qqrobot.listener.HeartBeatListener
+import cn.crazykid.qqrobot.listener.LocalExceptionListener
+import cn.crazykid.qqrobot.listener.friend.FriendMessageListener
 import org.mybatis.spring.annotation.MapperScan
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
@@ -22,7 +25,14 @@ open class Starter : CommandLineRunner {
     /**
      * 要注册的监听器
      */
-    private val listeners = arrayOf<IcqListener>()
+    private val listeners = arrayOf<IcqListener>(
+        // 心跳事件监听
+        HeartBeatListener(),
+        // 本地异常事件监听
+        LocalExceptionListener(),
+        // 好友私聊事件监听
+        FriendMessageListener(),
+    )
 
     override fun run(vararg args: String?) {
         // 创建机器人对象 ( 传入配置 )
