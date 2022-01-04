@@ -8,6 +8,7 @@ import cc.moecraft.logger.environments.ColorSupportLevel
 import cn.crazykid.qqrobot.listener.HeartBeatListener
 import cn.crazykid.qqrobot.listener.LocalExceptionListener
 import cn.crazykid.qqrobot.listener.friend.FriendMessageListener
+import cn.crazykid.qqrobot.listener.group.GroupMessageCountListener
 import org.mybatis.spring.annotation.MapperScan
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
@@ -32,6 +33,8 @@ open class Starter : CommandLineRunner {
         LocalExceptionListener(),
         // 好友私聊事件监听
         FriendMessageListener(),
+        // 群消息事件监听
+        GroupMessageCountListener(), // 统计消息数
     )
 
     override fun run(vararg args: String?) {
