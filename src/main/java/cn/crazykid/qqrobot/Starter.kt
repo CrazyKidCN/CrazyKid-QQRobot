@@ -7,7 +7,7 @@ import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.logger.environments.ColorSupportLevel
 import cn.crazykid.qqrobot.listener.HeartBeatListener
 import cn.crazykid.qqrobot.listener.LocalExceptionListener
-import cn.crazykid.qqrobot.listener.friend.FriendMessageListener
+import cn.crazykid.qqrobot.listener.friend.message.FriendMessageListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCountListener
 import org.mybatis.spring.annotation.MapperScan
 import org.springframework.boot.CommandLineRunner

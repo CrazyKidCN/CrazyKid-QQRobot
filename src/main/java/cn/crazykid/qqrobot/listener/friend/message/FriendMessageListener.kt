@@ -1,4 +1,4 @@
-package cn.crazykid.qqrobot.listener.friend
+package cn.crazykid.qqrobot.listener.friend.message
 
 import cc.moecraft.icq.event.EventHandler
 import cc.moecraft.icq.event.IcqListener
