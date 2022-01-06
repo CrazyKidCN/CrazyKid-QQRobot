@@ -10,6 +10,7 @@ import cn.crazykid.qqrobot.listener.LocalExceptionListener
 import cn.crazykid.qqrobot.listener.friend.message.FriendMessageListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCountListener
 import org.mybatis.spring.annotation.MapperScan
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -18,26 +19,38 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 @SpringBootApplication
 @MapperScan(value = ["cn.crazykid.qqrobot.mapper"])
 open class Starter : CommandLineRunner {
-    /**
-     * 要注册的指令
-     */
-    private val commands = arrayOf<IcqCommand>()
+    @Autowired
+    private lateinit var heartBeatListener: HeartBeatListener
 
-    /**
-     * 要注册的监听器
-     */
-    private val listeners = arrayOf<IcqListener>(
-        // 心跳事件监听
-        HeartBeatListener(),
-        // 本地异常事件监听
-        LocalExceptionListener(),
-        // 好友私聊事件监听
-        FriendMessageListener(),
-        // 群消息事件监听
-        GroupMessageCountListener(), // 统计消息数
-    )
+    @Autowired
+    private lateinit var localExceptionListener: LocalExceptionListener
+
+    @Autowired
+    private lateinit var friendMessageListener: FriendMessageListener
+
+    @Autowired
+    private lateinit var groupMessageCountListener: GroupMessageCountListener
 
     override fun run(vararg args: String?) {
+        /**
+         * 要注册的指令
+         */
+        val commands = arrayOf<IcqCommand>()
+
+        /**
+         * 要注册的监听器
+         */
+        val listeners = arrayOf<IcqListener>(
+            // 心跳事件监听
+            heartBeatListener,
+            // 本地异常事件监听
+            localExceptionListener,
+            // 好友私聊事件监听
+            friendMessageListener,
+            // 群消息事件监听
+            groupMessageCountListener, // 统计消息数
+        )
+
         // 创建机器人对象 ( 传入配置 )
         val bot = PicqBotX(
             PicqConfig(31092)
@@ -89,7 +102,7 @@ open class Starter : CommandLineRunner {
 
         // 注册指令
         // 从 v3.0.1.730 之后不会自动注册指令了, 因为效率太低 (≈4000ms), 而且在其他框架上有Bug
-        bot.commandManager.registerCommands(*commands)
+        //bot.commandManager.registerCommands(*commands)
 
         // Debug输出所有已注册的指令
         bot.logger.debug(bot.commandManager.commands.toString())

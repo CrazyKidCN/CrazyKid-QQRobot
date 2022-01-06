@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil
 import cn.hutool.db.nosql.redis.RedisDS
 import com.google.common.cache.CacheBuilder
 import com.google.common.collect.Maps
+import org.springframework.stereotype.Component
 import redis.clients.jedis.Jedis
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit
  * @author CrazyKid
  * @date 2021/1/19 10:33
  */
+@Component
 class GroupMessageCountListener : IcqListener() {
     companion object {
         /**

@@ -3,7 +3,9 @@ package cn.crazykid.qqrobot.listener.friend.message
 import cc.moecraft.icq.event.EventHandler
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.message.EventPrivateMessage
+import org.springframework.stereotype.Component
 
+@Component
 class FriendMessageListener : IcqListener() {
     @EventHandler
     fun onPrivateMessageEvent(event: EventPrivateMessage) {

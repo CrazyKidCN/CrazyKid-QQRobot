@@ -101,13 +101,14 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.7.17</version>
+            <version>5.7.18</version>
         </dependency>
 
+        <!-- 注: hutool 封装的 RedisDS 方法 不适合4.0.0的依赖, 不能升级 -->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>4.0.0</version>
+            <version>3.7.0</version>
         </dependency>
 
         <dependency>
