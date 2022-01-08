@@ -9,6 +9,7 @@ import cn.crazykid.qqrobot.listener.HeartBeatListener
 import cn.crazykid.qqrobot.listener.LocalExceptionListener
 import cn.crazykid.qqrobot.listener.friend.message.FriendMessageListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotAtListener
+import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotRepeatListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCountListener
 import org.mybatis.spring.annotation.MapperScan
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +36,9 @@ open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var groupMessageBotAtListener: GroupMessageBotAtListener
 
+    @Autowired
+    private lateinit var groupMessageBotRepeatListener: GroupMessageBotRepeatListener
+
     override fun run(vararg args: String?) {
         /**
          * 要注册的指令
@@ -54,6 +58,7 @@ open class Starter : CommandLineRunner {
             // 群消息事件监听
             groupMessageCountListener, // 统计消息数
             groupMessageBotAtListener, // bot被at事件
+            groupMessageBotRepeatListener, // bot复读
         )
 
         // 创建机器人对象 ( 传入配置 )
