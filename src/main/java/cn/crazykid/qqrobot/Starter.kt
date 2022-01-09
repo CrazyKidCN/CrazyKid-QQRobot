@@ -8,6 +8,7 @@ import cc.moecraft.logger.environments.ColorSupportLevel
 import cn.crazykid.qqrobot.listener.HeartBeatListener
 import cn.crazykid.qqrobot.listener.LocalExceptionListener
 import cn.crazykid.qqrobot.listener.friend.message.FriendMessageListener
+import cn.crazykid.qqrobot.listener.group.GroupPokeListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotAtListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotRepeatListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCountListener
@@ -39,6 +40,9 @@ open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var groupMessageBotRepeatListener: GroupMessageBotRepeatListener
 
+    @Autowired
+    private lateinit var groupPokeListener: GroupPokeListener
+
     override fun run(vararg args: String?) {
         /**
          * 要注册的指令
@@ -59,6 +63,8 @@ open class Starter : CommandLineRunner {
             groupMessageCountListener, // 统计消息数
             groupMessageBotAtListener, // bot被at事件
             groupMessageBotRepeatListener, // bot复读
+            // bot被戳事件
+            groupPokeListener,
         )
 
         // 创建机器人对象 ( 传入配置 )
@@ -87,7 +93,7 @@ open class Starter : CommandLineRunner {
 
         // 添加一个机器人账户 ( 名字, 发送URL, 发送端口 )
         try {
-            bot.addAccount("Bot01", "127.0.0.1", 5701)
+            bot.addAccount("Bot01", "127.0.0.1", 5700)
         } catch (e: Exception) {
             bot.logger.error("添加机器人账户失败", e)
             return
