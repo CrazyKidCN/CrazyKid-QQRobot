@@ -12,6 +12,7 @@ import cn.crazykid.qqrobot.listener.group.GroupPokeListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotAtListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotRepeatListener
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCountListener
+import cn.crazykid.qqrobot.listener.group.message.GroupMessageRandomPickListener
 import org.mybatis.spring.annotation.MapperScan
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
@@ -43,6 +44,9 @@ open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var groupPokeListener: GroupPokeListener
 
+    @Autowired
+    private lateinit var randomPickListener: GroupMessageRandomPickListener
+
     override fun run(vararg args: String?) {
         /**
          * 要注册的指令
@@ -65,6 +69,8 @@ open class Starter : CommandLineRunner {
             groupMessageBotRepeatListener, // bot复读
             // bot被戳事件
             groupPokeListener,
+            // 随机选择
+            randomPickListener,
         )
 
         // 创建机器人对象 ( 传入配置 )
