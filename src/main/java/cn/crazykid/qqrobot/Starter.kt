@@ -8,6 +8,7 @@ import cc.moecraft.logger.environments.ColorSupportLevel
 import cn.crazykid.qqrobot.listener.HeartBeatListener
 import cn.crazykid.qqrobot.listener.LocalExceptionListener
 import cn.crazykid.qqrobot.listener.friend.message.FriendMessageListener
+import cn.crazykid.qqrobot.listener.group.GroupAdminChangeListener
 import cn.crazykid.qqrobot.listener.group.GroupInviteRequestListener
 import cn.crazykid.qqrobot.listener.group.GroupMessageBilibiliParserListener
 import cn.crazykid.qqrobot.listener.group.GroupPokeListener
@@ -55,6 +56,9 @@ open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var groupInviteRequestListener: GroupInviteRequestListener
 
+    @Autowired
+    private lateinit var groupAdminChangeListener: GroupAdminChangeListener
+
     override fun run(vararg args: String?) {
         /**
          * 要注册的指令
@@ -82,6 +86,8 @@ open class Starter : CommandLineRunner {
             randomPickListener,
             // bot被邀请加入群事件
             groupInviteRequestListener,
+            // 群管理员变更事件
+            groupAdminChangeListener,
         )
 
         // 创建机器人对象 ( 传入配置 )
