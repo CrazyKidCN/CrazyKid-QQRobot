@@ -8,6 +8,7 @@ import cc.moecraft.logger.environments.ColorSupportLevel
 import cn.crazykid.qqrobot.listener.HeartBeatListener
 import cn.crazykid.qqrobot.listener.LocalExceptionListener
 import cn.crazykid.qqrobot.listener.friend.FriendAddListener
+import cn.crazykid.qqrobot.listener.friend.FriendPokeListener
 import cn.crazykid.qqrobot.listener.friend.message.FriendMessageListener
 import cn.crazykid.qqrobot.listener.group.*
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotAtListener
@@ -35,6 +36,9 @@ open class Starter : CommandLineRunner {
 
     @Autowired
     private lateinit var friendAddListener: FriendAddListener
+
+    @Autowired
+    private lateinit var friendPokeListener: FriendPokeListener
 
     @Autowired
     private lateinit var groupMessageCountListener: GroupMessageCountListener
@@ -81,6 +85,8 @@ open class Starter : CommandLineRunner {
             friendMessageListener,
             // bot被加好友事件
             friendAddListener,
+            // bot被好友被戳事件
+            friendPokeListener,
             // 群消息事件监听
             groupMessageCountListener, // 统计消息数
             groupMessageBotAtListener, // bot被at事件
