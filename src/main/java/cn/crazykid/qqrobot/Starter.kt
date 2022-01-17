@@ -67,6 +67,9 @@ open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var groupMemberApproveListener: GroupMemberApproveListener
 
+    @Autowired
+    private lateinit var groupHonorListener: GroupHonorListener
+
     override fun run(vararg args: String?) {
         /**
          * 要注册的指令
@@ -102,6 +105,8 @@ open class Starter : CommandLineRunner {
             groupAdminChangeListener,
             // 群成员被同意进群事件(含bot自己被同意进群)
             groupMemberApproveListener,
+            // 群荣耀变更事件(龙王等..)
+            groupHonorListener,
         )
 
         // 创建机器人对象 ( 传入配置 )
