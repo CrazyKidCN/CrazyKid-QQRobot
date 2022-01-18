@@ -70,6 +70,9 @@ open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var groupHonorListener: GroupHonorListener
 
+    @Autowired
+    private lateinit var groupMemberLeaveListener: GroupMemberLeaveListener
+
     override fun run(vararg args: String?) {
         /**
          * 要注册的指令
@@ -107,6 +110,8 @@ open class Starter : CommandLineRunner {
             groupMemberApproveListener,
             // 群荣耀变更事件(龙王等..)
             groupHonorListener,
+            // 群友退群事件
+            groupMemberLeaveListener,
         )
 
         // 创建机器人对象 ( 传入配置 )
