@@ -12,10 +12,7 @@ import cn.crazykid.qqrobot.listener.friend.FriendMessageRecallListener
 import cn.crazykid.qqrobot.listener.friend.FriendPokeListener
 import cn.crazykid.qqrobot.listener.friend.message.FriendMessageListener
 import cn.crazykid.qqrobot.listener.group.*
-import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotAtListener
-import cn.crazykid.qqrobot.listener.group.message.GroupMessageBotRepeatListener
-import cn.crazykid.qqrobot.listener.group.message.GroupMessageCountListener
-import cn.crazykid.qqrobot.listener.group.message.GroupMessageRandomPickListener
+import cn.crazykid.qqrobot.listener.group.message.*
 import org.mybatis.spring.annotation.MapperScan
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
@@ -55,6 +52,9 @@ open class Starter : CommandLineRunner {
 
     @Autowired
     private lateinit var groupMessageBilibiliParserListener: GroupMessageBilibiliParserListener
+
+    @Autowired
+    private lateinit var groupMessageRecallListener: GroupMessageRecallListener
 
     @Autowired
     private lateinit var groupPokeListener: GroupPokeListener
@@ -107,6 +107,7 @@ open class Starter : CommandLineRunner {
             groupMessageBotAtListener, // bot被at事件
             groupMessageBotRepeatListener, // bot复读
             groupMessageBilibiliParserListener, // bilibili解析
+            groupMessageRecallListener, // 群消息撤回事件
             // bot被戳事件
             groupPokeListener,
             // 随机选择
