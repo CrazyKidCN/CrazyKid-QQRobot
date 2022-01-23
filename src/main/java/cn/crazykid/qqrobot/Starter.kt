@@ -60,6 +60,9 @@ open class Starter : CommandLineRunner {
     private lateinit var groupMessageRedPackListener: GroupMessageRedPackListener
 
     @Autowired
+    private lateinit var groupMessageControlRecallListener: GroupMessageControlRecallListener
+
+    @Autowired
     private lateinit var groupPokeListener: GroupPokeListener
 
     @Autowired
@@ -112,6 +115,7 @@ open class Starter : CommandLineRunner {
             groupMessageBilibiliParserListener, // bilibili解析
             groupMessageRecallListener, // 群消息撤回事件
             groupMessageRedPackListener, // 群红包监听
+            groupMessageControlRecallListener, // 控制bot撤回自己的消息
             // bot被戳事件
             groupPokeListener,
             // 随机选择
