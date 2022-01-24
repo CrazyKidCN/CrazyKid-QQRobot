@@ -45,6 +45,9 @@ open class Starter : CommandLineRunner {
     private lateinit var groupMessageCountListener: GroupMessageCountListener
 
     @Autowired
+    private lateinit var groupMessageCounterListener: GroupMessageCounterListener
+
+    @Autowired
     private lateinit var groupMessageBotAtListener: GroupMessageBotAtListener
 
     @Autowired
@@ -110,6 +113,7 @@ open class Starter : CommandLineRunner {
             friendMessageRecallListener,
             // 群消息事件监听
             groupMessageCountListener, // 统计消息数
+            groupMessageCounterListener,
             groupMessageBotAtListener, // bot被at事件
             groupMessageBotRepeatListener, // bot复读
             groupMessageBilibiliParserListener, // bilibili解析
