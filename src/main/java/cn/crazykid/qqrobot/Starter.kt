@@ -69,6 +69,9 @@ open class Starter : CommandLineRunner {
     private lateinit var groupMessageGuessMaimaiSongListener: GroupMessageGuessMaimaiSongListener
 
     @Autowired
+    private lateinit var groupMessageRandomMaimaiMusicListener: GroupMessageRandomMaimaiMusicListener
+
+    @Autowired
     private lateinit var groupPokeListener: GroupPokeListener
 
     @Autowired
@@ -124,6 +127,7 @@ open class Starter : CommandLineRunner {
             groupMessageRedPackListener, // 群红包监听
             groupMessageControlRecallListener, // 控制bot撤回自己的消息
             groupMessageGuessMaimaiSongListener, // maimai猜歌小游戏
+            groupMessageRandomMaimaiMusicListener, // maimai随歌
             // bot被戳事件
             groupPokeListener,
             // 随机选择
