@@ -8,3 +8,13 @@ spring:
     password: root
   main:
     banner-mode: off
+
+maimaiGuessSong:
+  enable: true # 启用maimai猜歌小游戏
+
+arcadeCardCounter:
+  enable: true # 启用排卡功能
+
+group:
+  recall:
+    mute: false # 群友撤回是否禁言
