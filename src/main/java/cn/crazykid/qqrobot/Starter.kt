@@ -18,9 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.scheduling.annotation.EnableScheduling
 
 
 @SpringBootApplication
+@EnableScheduling
 @MapperScan(value = ["cn.crazykid.qqrobot.mapper"])
 open class Starter : CommandLineRunner {
     @Autowired
@@ -73,6 +75,9 @@ open class Starter : CommandLineRunner {
 
     @Autowired
     private lateinit var groupMessageMaimaiQueueCardListener: GroupMessageMaimaiQueueCardListener
+
+    @Autowired
+    private lateinit var groupMessageArcadeQueueListener: GroupMessageArcadeQueueListener
 
     @Autowired
     private lateinit var groupPokeListener: GroupPokeListener
@@ -132,6 +137,7 @@ open class Starter : CommandLineRunner {
             groupMessageGuessMaimaiSongListener, // maimai猜歌小游戏
             groupMessageRandomMaimaiMusicListener, // maimai随歌
             groupMessageMaimaiQueueCardListener, // maimai排卡数计数功能
+            groupMessageArcadeQueueListener,    // 机厅排队助手
             // bot被戳事件
             groupPokeListener,
             // 随机选择
