@@ -45,12 +45,12 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
     private val selectCardNumPattern = Pattern.compile("^(.*?)(现在)?(几|多少)([个张位])?([卡人神爷爹])[?？]?$")
     private val selectCardNumPattern2 = Pattern.compile("^(.*)[jJ几][kK卡]?$")
     private val operateCardNumPattern =
-        Pattern.compile("^(.*)([+＋加\\-－减=＝])(\\d{1,6}|[一两俩二三仨四五六七八九十+＋\\-－])([个张位])?([卡人神爷爹])?[\\s+]*(\\[CQ:at,qq=(\\d{1,12})\\])?$")
+        Pattern.compile("^(.*)([+＋加\\-－减=＝])(\\d{1,6}|[零一两俩二三仨四五六七八九十+＋\\-－])([个张位])?([卡人神爷爹])?[\\s+]*(\\[CQ:at,qq=(\\d{1,12})\\])?$")
     private val whoPattern = Pattern.compile("^(.*)有谁[?？]?$")
     private val wherePattern = Pattern.compile("^(.*)在哪[?？]?$")
 
     companion object {
-        private const val CACHE_NAME = "ArcadeCardQueue"
+        private const val CACHE_NAME = "ArcadeCardQueue_NEW"
         private const val HISTORY_CACHE_NAME = "ArcadeCardQueueOperateHistory"
     }
 
@@ -109,7 +109,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
 
     private fun saveHistory(arcadeName: String, messageParam: String) {
         val json: String? = jedis.hget(HISTORY_CACHE_NAME, arcadeName)
-        val historyList: MutableList<String> = if (json.isNullOrBlank()) {
+        val historyList: MutableList<String> = if (!json.isNullOrBlank()) {
             JSON.parseArray(json, String::class.java)
         } else {
             mutableListOf()
@@ -141,7 +141,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
     }
 
     // 距离第二天早晨5点的秒数
-    private val cacheExpireSecond: Int
+    private val cacheExpireSecond: Long
         get() {
             // 距离第二天早晨5点的秒数
             val calendar = Calendar.getInstance()
@@ -151,7 +151,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
             calendar[Calendar.HOUR_OF_DAY] = 5
             calendar[Calendar.MINUTE] = 0
             calendar[Calendar.SECOND] = 0
-            return Math.toIntExact((calendar.timeInMillis - System.currentTimeMillis()) / 1000)
+            return (calendar.timeInMillis - System.currentTimeMillis()) / 1000
         }
 
     @EventHandler
@@ -161,51 +161,53 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
         }
         val message = event.getMessage().trim()
         if ("j" == message || "几卡" == message || "几人" == message || "几爷" == message || "几神" == message || "查卡" == message) {
-            var hasArcade = false
+            val arcadeList = getArcadeList(event.groupId, false)
+                .filter { this.getArcadeGroupNumber(it).contains(event.groupId) }
+            if (arcadeList.isEmpty()) {
+                return
+            }
             val m = MessageBuilder()
             m.add(ComponentReply(event.messageId))
-            for (arcade in getArcadeList(event.groupId, false)) {
-                if (getArcadeGroupNumber(arcade).contains(event.groupId)) {
-                    hasArcade = true
-                    m.add(arcade.name).add(": ").add(arcade.cardNum).add("卡")
-                    if (arcade.machineNum > 1 && arcade.cardNum != 0) {
-                        val average = arcade.cardNum.toFloat() / arcade.machineNum
-                        val floor = floor(average.toDouble()).toInt()
-                        val ceil = ceil(average.toDouble()).toInt()
-                        if (floor == ceil) {
-                            m.add(",机均").add(floor)
-                        } else {
-                            m.add(",机均").add(floor).add("-").add(ceil)
-                        }
-                    }
-                    if (arcade.updateTime == null) {
-                        m.add("(今日未更新) ")
+            arcadeList.forEachIndexed { index, arcade ->
+                m.add(arcade.name).add(": ").add(arcade.cardNum).add("卡")
+                if (arcade.machineNum > 1 && arcade.cardNum != 0) {
+                    val average = arcade.cardNum.toFloat() / arcade.machineNum
+                    val floor = floor(average.toDouble()).toInt()
+                    val ceil = ceil(average.toDouble()).toInt()
+                    if (floor == ceil) {
+                        m.add(",机均").add(floor)
                     } else {
-                        m.add("(").add(DateUtil.format(arcade.updateTime, "HH:mm:ss")).add(") ")
+                        m.add(",机均").add(floor).add("-").add(ceil)
                     }
+                }
+                if (arcade.cardUpdateTime == null) {
+                    m.add("(今日未更新) ")
+                } else {
+                    m.add("(").add(DateUtil.format(arcade.cardUpdateTime, "HH:mm:ss")).add(") ")
+                }
+                if (index < arcadeList.size - 1) {
                     m.newLine()
                 }
             }
-            m.add("其它本BOT统计的机厅卡数可至 https://bot.crazykid.cn/ 查看")
-            if (hasArcade) {
-                sendGroupMsg(event, event.groupId, m.toString(), 1000)
-            }
+            //m.add("其它: bot.crazykid.cn")
+            sendGroupMsg(event, event.groupId, m.toString(), 1000)
             return
         }
         if ("机厅列表" == message) {
-            var hasArcade = false
+            val arcadeList = getArcadeList(event.groupId, false)
+                .filter { this.getArcadeGroupNumber(it).contains(event.groupId) }
+            if (arcadeList.isEmpty()) {
+                return
+            }
             val m = MessageBuilder()
             m.add(ComponentReply(event.messageId)).add("机厅名称及别名如下:").newLine()
-            for (arcade in getArcadeList(event.groupId, false)) {
-                if (getArcadeGroupNumber(arcade).contains(event.groupId)) {
-                    hasArcade = true
-                    m.add(arcade.name).add(": ").add(java.lang.String.join("、", getArcadeAlias(arcade)))
+            arcadeList.forEachIndexed { index, arcade ->
+                m.add(arcade.name).add(": ").add(java.lang.String.join("、", getArcadeAlias(arcade)))
+                if (index < arcadeList.size - 1) {
                     m.newLine()
                 }
             }
-            if (hasArcade) {
-                sendGroupMsg(event, event.groupId, m.toString(), 1000)
-            }
+            sendGroupMsg(event, event.groupId, m.toString(), 1000)
             return
         }
 
@@ -248,13 +250,16 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                     } else {
                         m.add("。").newLine()
                     }
-                    if (arcade.updateTime == null) {
+                    if (arcade.cardUpdateTime == null) {
                         m.add("今日未更新。")
                     } else {
-                        m.add("最后由 ").add(arcade.updateBy).add(" 更新于 ")
-                            .add(DateUtil.format(arcade.updateTime, "HH:mm:ss")).add("。")
+                        m.add("最后由 ").add(arcade.cardUpdateBy).add(" 更新于 ")
+                            .add(DateUtil.format(arcade.cardUpdateTime, "HH:mm:ss")).add("。")
                     }
-                    m.newLine().add("加减" + cardUnit + "数请发送\"" + arcadeName + "++\"或\"" + arcadeName + "--\"")
+                    if (!getArcadeGroupNumber(arcade).isEmpty()) {
+                        // 彩蛋不显示该提示
+                        m.newLine().add("加减" + cardUnit + "数请发送\"" + arcadeName + "++\"或\"" + arcadeName + "--\"")
+                    }
                     sendGroupMsg(event, event.groupId, m.toString(), 1000)
                     return
                 }
@@ -296,7 +301,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                 helpGroupUser = event.getGroupUser(helpQQ.toLong())
             }
             val number = numberStrToInt(numberStr)
-            if (number <= 0) {
+            if (number < 0) {
                 return
             }
             val arcadeList = getArcadeList(event.groupId, false)
@@ -308,11 +313,6 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         arcade
                     ).contains(event.groupId) || getArcadeGroupNumber(arcade).isEmpty())
                 ) {
-                    if (number > 30) {
-                        m.add("一次不能操作多于30张卡")
-                        sendGroupMsg(event, event.groupId, m.toString(), 1000)
-                        return
-                    }
                     val operator =
                         if (event.groupSender.info.card.isNotEmpty()) event.groupSender.info.card else event.groupSender.info.nickname
                     when (operate) {
@@ -321,6 +321,11 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                             setCard(arcade, number, operator)
                         }
                         "+", "＋", "加" -> {
+                            if (number > 10) {
+                                m.add("一次不能操作多于10张卡")
+                                sendGroupMsg(event, event.groupId, m.toString(), 1000)
+                                return
+                            }
                             operateType = 1
                             addCard(arcade, number, operator)
                         }
@@ -369,12 +374,10 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         val floor = floor(average.toDouble()).toInt()
                         val ceil = ceil(average.toDouble()).toInt()
                         if (floor == ceil) {
-                            m.add(", 机均").add(floor).add(cardUnit).add("。").newLine()
+                            m.add(", 机均").add(floor).add(cardUnit).add("。")
                         } else {
-                            m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit).newLine()
+                            m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit)
                         }
-                    } else {
-                        m.newLine()
                     }
                     sendGroupMsg(event, event.groupId, m.toString(), 1000)
                     return
@@ -429,6 +432,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
             return 0
         }
         when (numberStr) {
+            "零" -> return 0
             "一", "+", "＋", "-", "－" -> return 1
             "二", "两", "俩" -> return 2
             "三", "仨" -> return 3
