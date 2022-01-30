@@ -5,7 +5,6 @@ import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.message.EventGroupMessage
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentImage
-import cn.hutool.core.util.ObjectUtil
 import cn.hutool.core.util.ReUtil
 import cn.hutool.http.HttpRequest
 import com.alibaba.fastjson.JSON
@@ -71,13 +70,13 @@ class GroupMessageBilibiliParserListener : IcqListener() {
 
     private fun getAvBvFromUrl(url: String?): Map<String, Any>? {
         val regex = "bilibili\\.com\\/video\\/(?:[Aa][Vv]([0-9]+)|([Bb][Vv][0-9a-zA-Z]+))"
-        var av: String = ReUtil.get(regex, url, 1)
-        var bv: String = ReUtil.get(regex, url, 2)
+        var av: String? = ReUtil.get(regex, url, 1)
+        var bv: String? = ReUtil.get(regex, url, 2)
         val map = mutableMapOf<String, Any>()
-        if (ObjectUtil.isNotEmpty(av)) {
+        if (!av.isNullOrBlank()) {
             map["aid"] = av
         }
-        if (ObjectUtil.isNotEmpty(bv)) {
+        if (!bv.isNullOrBlank()) {
             map["bvid"] = bv
         }
         if (map.isNotEmpty()) {
@@ -86,16 +85,16 @@ class GroupMessageBilibiliParserListener : IcqListener() {
 
         // 没有匹配上，尝试匹配b站短连接
         val shortUrlRegex = "(b23|acg)\\.tv\\/[0-9a-zA-Z]+"
-        val match: String = ReUtil.get(shortUrlRegex, url, 0)
-        if (ObjectUtil.isNotEmpty(match)) {
+        val match: String? = ReUtil.get(shortUrlRegex, url, 0)
+        if (!match.isNullOrBlank()) {
             // 拿到重定向后的链接..
             val redirectUrl = HttpRequest.get(url).execute().header("Location")
             av = ReUtil.get(regex, redirectUrl, 1)
             bv = ReUtil.get(regex, redirectUrl, 2)
-            if (ObjectUtil.isNotEmpty(av)) {
+            if (!av.isNullOrBlank()) {
                 map["aid"] = av
             }
-            if (ObjectUtil.isNotEmpty(bv)) {
+            if (!bv.isNullOrBlank()) {
                 map["bvid"] = bv
             }
             if (map.isNotEmpty()) {
