@@ -6,12 +6,15 @@ import cc.moecraft.icq.event.events.message.EventGroupMessage
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentAt
 import cc.moecraft.icq.sender.message.components.ComponentImage
+import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.entity.MaimaiMusic
 import cn.crazykid.qqrobot.util.PathUtil
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.img.ImgUtil
 import cn.hutool.core.io.FileUtil
+import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.lang.Console
+import cn.hutool.core.text.csv.CsvUtil
 import cn.hutool.core.thread.ThreadUtil
 import cn.hutool.core.util.RandomUtil
 import cn.hutool.http.HttpUtil
@@ -32,6 +35,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
 
     companion object {
         val groupList = mutableListOf<Group>()
+        val songAliases: MutableMap<String, MutableList<String>> = mutableMapOf()
     }
 
     @EventHandler
@@ -42,6 +46,15 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
 
         val group = this.getGroupObject(event.groupId)
 
+        if ("猜歌" == event.message) {
+            event.httpApi.sendGroupMsg(
+                event.groupId, MessageBuilder()
+                    .add(ComponentReply(event.messageId))
+                    .add("为了防止跟千雪的猜歌功能冲突, 请输入\"maimai猜歌\"来启动").toString()
+            )
+            return
+        }
+
         if ("maimai猜歌" == event.message) {
             if (group.running) {
                 //event.httpApi.sendGroupMsg(event.groupId, "游戏进行中, 请稍后")
@@ -49,16 +62,30 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
             }
             val now = Date()
             if (group.nextCanRunTime != null && now.before(group.nextCanRunTime)) {
-                event.httpApi.sendGroupMsg(event.groupId, "冷却中, 剩余 ${(group.nextCanRunTime!!.time - now.time) / 1000}s")
+                event.httpApi.sendGroupMsg(
+                    event.groupId, MessageBuilder()
+                        .add(ComponentReply(event.messageId))
+                        .add("冷却中, 剩余 ${(group.nextCanRunTime!!.time - now.time) / 1000}s").toString()
+                )
                 return
             }
 
             //
             ThreadUtil.execute {
-                Console.log("猜歌线程名: " + Thread.currentThread().name)
+                println("猜歌线程名: " + Thread.currentThread().name)
                 try {
                     group.running = true
                     group.maimaiMusic = GroupMessageRandomMaimaiMusicListener.maidata.random()
+                    println("要猜的歌: ${group.maimaiMusic!!.title}, 别名map长度: ${songAliases.size}")
+
+                    // 获取这首歌的别名
+                    if (songAliases.containsKey(group.maimaiMusic!!.title)) {
+                        println("已找到别名: ${songAliases[group.maimaiMusic!!.title]}")
+                        group.songAliases = songAliases[group.maimaiMusic!!.title]
+                    } else {
+                        println("未找到别名")
+                        group.songAliases = null
+                    }
 
                     val messageList = mutableListOf<String>()
 
@@ -114,7 +141,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
 
                     event.httpApi.sendGroupMsg(
                         event.groupId,
-                        "猜歌游戏将在10秒后开始。我将在接下来每隔10秒描述这条歌曲的信息，猜歌期间可使用千雪的查歌指令, 然后通过回复歌曲名称参与猜歌。"
+                        "猜歌游戏将在10秒后开始。我将在接下来每隔10秒描述这条歌曲的信息，猜歌期间可使用千雪的查歌指令辅助查歌, 然后通过回复歌曲名称参与猜歌。连续4个字符命中歌曲名称, 或者答出歌曲的别名, 就算答对。(不支持用千雪的歌曲id作答)"
                     )
                     ThreadUtil.safeSleep(10000)
 
@@ -148,7 +175,8 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
             if (group.maimaiMusic!!.title!!.equals(
                     event.message,
                     true
-                ) || (event.message.length >= 4 && group.maimaiMusic!!.title!!.contains(event.message, true))
+                ) || (event.message.length >= 4 && group.maimaiMusic!!.title!!.contains(event.message, true)) ||
+                (!group.songAliases.isNullOrEmpty() && group.songAliases!!.contains(event.message))
             ) {
                 val messageBuilder = MessageBuilder()
                 messageBuilder.add(ComponentAt(event.senderId)).add("答对了! 答案是 ").add(group.maimaiMusic!!.title)
@@ -180,7 +208,31 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
         return group;
     }
 
-
+    init {
+        // 初始化别名数据, 读取csv文件
+        val reader = CsvUtil.getReader()
+        val data = reader.readFromStr(ResourceUtil.readUtf8Str("aliases.csv"))
+        val rows = data.rows
+        //遍历行
+        for (csvRow in rows) {
+            //\t分割, 第一个是歌曲完整名称, 后面是别名
+            for (str in csvRow.rawList) {
+                val split = str.split("\t")
+                if (split.size > 1) {
+                    split.forEachIndexed { index, songName ->
+                        if (index > 0) {
+                            songAliases.merge(split[0], mutableListOf(songName)) { existed, replacement ->
+                                run {
+                                    existed.addAll(replacement)
+                                    existed
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 class Group {
@@ -189,6 +241,7 @@ class Group {
     var thread: Thread? = null
     var coverFile: File? = null
     var maimaiMusic: MaimaiMusic? = null
+    var songAliases: MutableList<String>? = null
     var nextCanRunTime: Date? = null
 }
 
