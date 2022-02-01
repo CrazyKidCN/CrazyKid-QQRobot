@@ -5,6 +5,7 @@ import cc.moecraft.icq.PicqConfig
 import cc.moecraft.icq.command.interfaces.IcqCommand
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.logger.environments.ColorSupportLevel
+import cn.crazykid.qqrobot.config.PicqBotXConfig
 import cn.crazykid.qqrobot.listener.HeartBeatListener
 import cn.crazykid.qqrobot.listener.LocalExceptionListener
 import cn.crazykid.qqrobot.listener.friend.FriendAddListener
@@ -18,12 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.scheduling.annotation.EnableScheduling
 
 
 @SpringBootApplication
 @EnableScheduling
 @MapperScan(value = ["cn.crazykid.qqrobot.mapper"])
+@ConfigurationPropertiesScan
 open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var heartBeatListener: HeartBeatListener
@@ -103,6 +106,9 @@ open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var groupLuckyKingListener: GroupLuckyKingListener
 
+    @Autowired
+    private lateinit var picqBotXConfig: PicqBotXConfig
+
     override fun run(vararg args: String?) {
         /**
          * 要注册的指令
@@ -158,7 +164,7 @@ open class Starter : CommandLineRunner {
 
         // 创建机器人对象 ( 传入配置 )
         val bot = PicqBotX(
-            PicqConfig(31092)
+            PicqConfig(picqBotXConfig.port)
                 .setDebug(false) // 是否输出debug信息
                 .setNoVerify(false) // 是否跳过酷Q版本验证 (不推荐)
                 .setCommandsAlsoCallEvents(true) // 指令是否触发消息事件
@@ -172,8 +178,8 @@ open class Starter : CommandLineRunner {
                 .setApiRateLimited(false) // 是否启用限速调用API (需要enable_rate_limited_actions=true
                 .setApiAsync(false) // 是否异步调用API
                 .setCommandArgsSplitRegex(" ") // 解析指令的时候用来分割参数的正则
-                .setSecret("woaifengkuang") // SHA1 验证秘钥 (设置为空就是不验证)
-                .setAccessToken("woaifengkuang") // Access Token 访问令牌 (设置为空就是不用令牌)
+                .setSecret(picqBotXConfig.secret) // SHA1 验证秘钥 (设置为空就是不验证)
+                .setAccessToken(picqBotXConfig.accessToken) // Access Token 访问令牌 (设置为空就是不用令牌)
                 .setColorSupportLevel(ColorSupportLevel.FORCED) // Logger颜色支持级别 (设为DISABLED就没有颜色了)
                 .setLogPath("logs") // Logger日志路径 (设为空就不输出文件了)
                 .setLogFileName("PicqBotX-Log") // Logger日志文件名
@@ -182,7 +188,7 @@ open class Starter : CommandLineRunner {
 
         // 添加一个机器人账户 ( 名字, 发送URL, 发送端口 )
         try {
-            bot.addAccount("Bot01", "127.0.0.1", 5700)
+            bot.addAccount("Bot", picqBotXConfig.postHost, picqBotXConfig.postPort)
         } catch (e: Exception) {
             bot.logger.error("添加机器人账户失败", e)
             return

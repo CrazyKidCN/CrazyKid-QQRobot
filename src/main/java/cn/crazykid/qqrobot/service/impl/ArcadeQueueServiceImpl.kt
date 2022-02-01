@@ -13,7 +13,6 @@ import cn.crazykid.qqrobot.service.IArcadeQueueService
 import cn.crazykid.qqrobot.util.ArcadeQueueCardUtil
 import cn.hutool.core.lang.Console
 import cn.hutool.core.thread.ThreadUtil
-import cn.hutool.db.nosql.redis.RedisDS
 import com.alibaba.fastjson.JSON
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -39,20 +38,16 @@ class ArcadeQueueServiceImpl : IArcadeQueueService {
     @Autowired
     private lateinit var arcadeQueuePlayerService: IArcadeQueuePlayerService
 
-    private val jedis: Jedis = RedisDS.create().jedis
+    @Autowired
+    private lateinit var jedis: Jedis
 
     companion object {
         // 格式化: 群号_机厅名
         private const val CACHE_NAME = "ArcadeQueue_%d_%s"
 
         // 旧的机厅排卡数缓存
-        private const val ARCADE_CARD_QUEUE_CACHE_NAME = "ArcadeCardQueue"
+        private const val ARCADE_CARD_QUEUE_CACHE_NAME = "ArcadeCardQueue_NEW"
     }
-
-    init {
-        jedis.select(4)
-    }
-
 
     override fun getArcadeList(groupNumber: Long, isReload: Boolean): List<Arcade> {
         Console.log("获取机厅列表...")

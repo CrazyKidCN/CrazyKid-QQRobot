@@ -14,7 +14,6 @@ import cn.hutool.core.date.DateUtil
 import cn.hutool.core.lang.Console
 import cn.hutool.core.thread.ThreadUtil
 import cn.hutool.core.util.ReUtil
-import cn.hutool.db.nosql.redis.RedisDS
 import com.alibaba.fastjson.JSON
 import lombok.SneakyThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,7 +39,8 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
     @Value("\${arcadeCardCounter.enable:false}")
     private var isEnable: Boolean = false
 
-    private val jedis: Jedis = RedisDS.create().jedis
+    @Autowired
+    private lateinit var jedis: Jedis
 
     private val selectCardNumPattern = Pattern.compile("^(.*?)(现在)?(几|多少)([个张位])?([卡人神爷爹])[?？]?$")
     private val selectCardNumPattern2 = Pattern.compile("^(.*)[jJ几][kK卡]?$")
@@ -52,10 +52,6 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
     companion object {
         private const val CACHE_NAME = "ArcadeCardQueue_NEW"
         private const val HISTORY_CACHE_NAME = "ArcadeCardQueueOperateHistory"
-    }
-
-    init {
-        jedis.select(4)
     }
 
     @SneakyThrows

@@ -50,6 +50,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- cqhttp QQ机器人接口 java sdk -->
         <dependency>
             <groupId>cc.moecraft</groupId>
