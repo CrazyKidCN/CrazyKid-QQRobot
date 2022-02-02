@@ -18,6 +18,11 @@ import java.util.List;
 @Repository
 public class ArcadeQueuePlayerDaoImpl extends ArcadeQueuePlayerBaseDao implements ArcadeQueuePlayerDao {
     @Override
+    public void deleteAll() {
+        mapper().delete(new ArcadeQueuePlayerQuery());
+    }
+
+    @Override
     public ArcadeQueuePlayer selectOneByQQNumber(long qqNumber) {
         return mapper.findOne(new ArcadeQueuePlayerQuery()
                 .where.qqNumber().eq(qqNumber).end()

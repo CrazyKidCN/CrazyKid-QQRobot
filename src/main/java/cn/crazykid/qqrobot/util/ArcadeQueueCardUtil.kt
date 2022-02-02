@@ -11,14 +11,14 @@ import java.util.*
 object ArcadeQueueCardUtil {
     fun addCard(arcade: Arcade, num: Int, updateBy: String) {
         arcade.cardNum = arcade.cardNum + num
-        arcade.updateBy = updateBy
-        arcade.updateTime = Date()
+        arcade.cardUpdateBy = updateBy
+        arcade.cardUpdateTime = Date()
     }
 
     fun setCard(arcade: Arcade, num: Int, updateBy: String) {
         arcade.cardNum = num
-        arcade.updateBy = updateBy
-        arcade.updateTime = Date()
+        arcade.cardUpdateBy = updateBy
+        arcade.cardUpdateTime = Date()
     }
 
     fun getArcadeAlias(arcade: Arcade): List<String> {

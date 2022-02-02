@@ -9,6 +9,14 @@ spring:
   main:
     banner-mode: off
 
+picqbotx:
+  port: 31091
+  debug: false
+  secret: secret
+  accessToken: accessToken
+  postHost: 127.0.0.1
+  postPort: 5700
+
 maimaiGuessSong:
   enable: true # 启用maimai猜歌小游戏
 
