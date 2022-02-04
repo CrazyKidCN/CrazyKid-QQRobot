@@ -44,6 +44,9 @@ open class Starter : CommandLineRunner {
     private lateinit var friendPokeListener: FriendPokeListener
 
     @Autowired
+    private lateinit var groupMessageHelpListener: GroupMessageHelpListener
+
+    @Autowired
     private lateinit var friendMessageRecallListener: FriendMessageRecallListener
 
     @Autowired
@@ -135,6 +138,7 @@ open class Starter : CommandLineRunner {
             // 好友撤回消息事件
             friendMessageRecallListener,
             // 群消息事件监听
+            groupMessageHelpListener, //帮助
             groupMessageCountListener, // 统计消息数
             groupMessageCounterListener,
             groupMessageBotAtListener, // bot被at事件
