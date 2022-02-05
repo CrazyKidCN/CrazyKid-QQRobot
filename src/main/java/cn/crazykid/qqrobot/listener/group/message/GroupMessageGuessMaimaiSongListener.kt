@@ -7,6 +7,7 @@ import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentAt
 import cc.moecraft.icq.sender.message.components.ComponentImage
 import cc.moecraft.icq.sender.message.components.ComponentReply
+import cn.crazykid.qqrobot.entity.GuessMaimaiSongConfig
 import cn.crazykid.qqrobot.entity.MaimaiMusic
 import cn.crazykid.qqrobot.util.PathUtil
 import cn.hutool.core.date.DateUtil
@@ -17,9 +18,13 @@ import cn.hutool.core.lang.Console
 import cn.hutool.core.text.csv.CsvUtil
 import cn.hutool.core.thread.ThreadUtil
 import cn.hutool.core.util.RandomUtil
+import cn.hutool.core.util.StrUtil
 import cn.hutool.http.HttpUtil
+import com.alibaba.fastjson.JSON
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import redis.clients.jedis.Jedis
 import java.awt.Rectangle
 import java.io.File
 import java.util.*
@@ -33,9 +38,14 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
     @Value("\${maimaiGuessSong.enable:false}")
     private var isEnable: Boolean = false
 
+    @Autowired
+    private lateinit var jedis: Jedis
+
     companion object {
         val groupList = mutableListOf<Group>()
         val songAliases: MutableMap<String, MutableList<String>> = mutableMapOf()
+
+        val CONFIG_CACHE_NAME: String = "MaimaiGuessSong_Config"
     }
 
     @EventHandler
@@ -55,22 +65,172 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
             return
         }
 
-        if ("maimai猜歌" == event.message) {
+        if (event.message.startsWith("maimai猜歌")) {
             if (group.running) {
                 //event.httpApi.sendGroupMsg(event.groupId, "游戏进行中, 请稍后")
                 return
             }
+
             val now = Date()
-            if (group.nextCanRunTime != null && now.before(group.nextCanRunTime)) {
+            val msgSplit = StrUtil.splitTrim(event.message, " ")
+            if (msgSplit.size == 1) {
+                // 检查配置是否存在
+                val configJson = jedis.hget(CONFIG_CACHE_NAME, event.groupId.toString())
+                if (!configJson.isNullOrBlank()) {
+                    val config = JSON.parseObject(configJson, GuessMaimaiSongConfig::class.java)
+                    if (!config.enable!!) {
+                        event.httpApi.sendGroupMsg(
+                            event.groupId, MessageBuilder()
+                                .add(ComponentReply(event.messageId))
+                                .add("本群已禁用猜歌, 如需启用, 请让群管输入\"maimai猜歌 启用\"").toString()
+                        )
+                        return
+                    }
+                    if (group.lastRunTime != null && now.before(
+                            DateUtil.offsetSecond(
+                                group.lastRunTime,
+                                config.cooldown!!
+                            )
+                        )
+                    ) {
+                        event.httpApi.sendGroupMsg(
+                            event.groupId, MessageBuilder()
+                                .add(ComponentReply(event.messageId))
+                                .add(
+                                    "冷却中, 剩余 ${
+                                        (DateUtil.offsetSecond(
+                                            group.lastRunTime,
+                                            config.cooldown!!
+                                        ).time - now.time) / 1000
+                                    }s"
+                                )
+                                .newLine()
+                                .add("群管可以输入\"maimai猜歌 设置cd 秒数\"设置cd").toString()
+                        )
+                        return
+                    }
+                } else {
+                    // 初始化默认配置
+                    val config = GuessMaimaiSongConfig()
+                    config.enable = true
+                    config.cooldown = 300
+                    jedis.hset(CONFIG_CACHE_NAME, event.groupId.toString(), JSON.toJSONString(config))
+                }
+            } else if (msgSplit[1] == "禁用" || msgSplit[1] == "关闭") {
+                if (event.senderId != 694372459L && !event.isAdmin(event.senderId)) {
+                    event.httpApi.sendGroupMsg(
+                        event.groupId, MessageBuilder()
+                            .add(ComponentReply(event.messageId))
+                            .add("仅bot主或群管可以进行该操作").toString()
+                    )
+                    return
+                }
+                // 检查配置是否存在
+                var configJson = jedis.hget(CONFIG_CACHE_NAME, event.groupId.toString())
+                if (!configJson.isNullOrBlank()) {
+                    val config = JSON.parseObject(configJson, GuessMaimaiSongConfig::class.java)
+                    config.enable = false
+                    configJson = JSON.toJSONString(config)
+                } else {
+                    // 初始化默认配置
+                    val config = GuessMaimaiSongConfig()
+                    config.enable = false
+                    config.cooldown = 300
+                    configJson = JSON.toJSONString(config)
+                }
+                // 保存配置
+                jedis.hset(CONFIG_CACHE_NAME, event.groupId.toString(), configJson)
+
                 event.httpApi.sendGroupMsg(
                     event.groupId, MessageBuilder()
                         .add(ComponentReply(event.messageId))
-                        .add("冷却中, 剩余 ${(group.nextCanRunTime!!.time - now.time) / 1000}s").toString()
+                        .add("已禁用, 可输入\"maimai猜歌 启用\"来启用").toString()
+                )
+                return
+            } else if (msgSplit[1] == "启用" || msgSplit[1] == "开启") {
+                if (event.senderId != 694372459L && !event.isAdmin(event.senderId)) {
+                    event.httpApi.sendGroupMsg(
+                        event.groupId, MessageBuilder()
+                            .add(ComponentReply(event.messageId))
+                            .add("仅bot主或群管可以进行该操作").toString()
+                    )
+                    return
+                }
+                // 检查配置是否存在
+                var configJson = jedis.hget(CONFIG_CACHE_NAME, event.groupId.toString())
+                if (!configJson.isNullOrBlank()) {
+                    val config = JSON.parseObject(configJson, GuessMaimaiSongConfig::class.java)
+                    config.enable = true
+                    configJson = JSON.toJSONString(config)
+                } else {
+                    // 初始化默认配置
+                    val config = GuessMaimaiSongConfig()
+                    config.enable = true
+                    config.cooldown = 300
+                    configJson = JSON.toJSONString(config)
+                }
+                // 保存配置
+                jedis.hset(CONFIG_CACHE_NAME, event.groupId.toString(), configJson)
+
+                event.httpApi.sendGroupMsg(
+                    event.groupId, MessageBuilder()
+                        .add(ComponentReply(event.messageId))
+                        .add("已启用, 可输入\"maimai猜歌 禁用\"来禁用").toString()
+                )
+                return
+            } else if (msgSplit[1] == "设置cd" || msgSplit[1] == "设置CD") {
+                if (msgSplit.size < 3 || !StrUtil.isNumeric(msgSplit[2])) {
+                    return
+                }
+                if (event.senderId != 694372459L && !event.isAdmin(event.senderId)) {
+                    event.httpApi.sendGroupMsg(
+                        event.groupId, MessageBuilder()
+                            .add(ComponentReply(event.messageId))
+                            .add("仅bot主或群管可以进行该操作").toString()
+                    )
+                    return
+                }
+                val cooldown = msgSplit[2].toInt()
+                if (cooldown < 0 || cooldown > 3600) {
+                    event.httpApi.sendGroupMsg(
+                        event.groupId, MessageBuilder()
+                            .add(ComponentReply(event.messageId))
+                            .add("cd的取值范围为0-3600秒").toString()
+                    )
+                    return
+                }
+
+                // 检查配置是否存在
+                var configJson = jedis.hget(CONFIG_CACHE_NAME, event.groupId.toString())
+                if (!configJson.isNullOrBlank()) {
+                    val config = JSON.parseObject(configJson, GuessMaimaiSongConfig::class.java)
+                    config.cooldown = cooldown
+                    configJson = JSON.toJSONString(config)
+                } else {
+                    // 初始化默认配置
+                    val config = GuessMaimaiSongConfig()
+                    config.enable = true
+                    config.cooldown = cooldown
+                    configJson = JSON.toJSONString(config)
+                }
+                // 保存配置
+                jedis.hset(CONFIG_CACHE_NAME, event.groupId.toString(), configJson)
+
+                event.httpApi.sendGroupMsg(
+                    event.groupId, MessageBuilder()
+                        .add(ComponentReply(event.messageId))
+                        .add("已设置cd为 $cooldown 秒").toString()
+                )
+                return
+            } else {
+                event.httpApi.sendGroupMsg(
+                    event.groupId, MessageBuilder()
+                        .add(ComponentReply(event.messageId))
+                        .add("参数有误, 如果要启动游戏, 请不要加任何参数.").toString()
                 )
                 return
             }
 
-            //
             ThreadUtil.execute {
                 println("猜歌线程名: " + Thread.currentThread().name)
                 try {
@@ -141,7 +301,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
 
                     event.httpApi.sendGroupMsg(
                         event.groupId,
-                        "猜歌游戏将在10秒后开始。我将在接下来每隔10秒描述这条歌曲的信息，猜歌期间可使用千雪的查歌指令辅助查歌, 然后通过回复歌曲名称参与猜歌。连续4个字符命中歌曲名称, 或者答出歌曲的别名, 就算答对。(不支持用千雪的歌曲id作答)"
+                        "猜歌游戏将在10秒后开始。我将在接下来每隔10秒描述这条歌曲的信息，猜歌期间可使用千雪的查歌指令辅助查歌, 然后通过回复歌曲名称参与猜歌。连续4个字符命中歌曲名称, 或者答出歌曲的别名, 就算答对。(不支持用千雪的歌曲id作答)\n群管可以通过\"maimai猜歌 禁用\"禁用此功能, 或\"maimai猜歌 设置cd 秒数\"设置cd(默认300s)"
                     )
                     ThreadUtil.safeSleep(10000)
 
@@ -166,7 +326,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
                 } finally {
                     Console.log("finally块复位")
                     group.running = false
-                    group.nextCanRunTime = DateUtil.offsetMinute(Date(), 5)
+                    group.lastRunTime = Date()
                 }
             }
         }
@@ -205,7 +365,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
             group.id = groupId
             groupList.add(group)
         }
-        return group;
+        return group
     }
 
     init {
@@ -242,11 +402,11 @@ class Group {
     var coverFile: File? = null
     var maimaiMusic: MaimaiMusic? = null
     var songAliases: MutableList<String>? = null
-    var nextCanRunTime: Date? = null
+    var lastRunTime: Date? = null
 }
 
 fun main() {
-    val path = PathUtil.getClassPath() + "temp/";
+    val path = PathUtil.getClassPath() + "temp/"
 
     val coverFile: File = HttpUtil.downloadFileFromUrl(
         "https://maimai.wahlap.com/maimai-mobile/img/Music/0efe51bee252ef32.png",

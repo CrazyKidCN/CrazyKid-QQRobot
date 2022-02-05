@@ -13,6 +13,8 @@ import java.util.List;
  * <p/>@author Powered By Fluent Mybatis
  */
 public interface ArcadeQueuePlayerDao extends IBaseDao<ArcadeQueuePlayer> {
+    void deleteAll();
+
     ArcadeQueuePlayer selectOneByQQNumber(long qqNumber);
 
     void deleteByQQNumber(long qqNumber);
