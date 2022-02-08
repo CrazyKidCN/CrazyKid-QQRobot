@@ -41,7 +41,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
     private val leavePattern = Pattern.compile("^(\\d{1,2})?(暂离|不在)$")
     private val backPattern = Pattern.compile("^(.*?)回来了$")
     private val quitQueuePattern = Pattern.compile("^(\\d{1,2})?(退勤|走了)$")
-    private val viewQueuePattern = Pattern.compile("^(.*?)(有谁|队列)$")
+    private val viewQueuePattern = Pattern.compile("^(.*?)队列$")
     private val exchangeQueuePattern = Pattern.compile("^(调序|对调)[\\s+]*(\\d{1,2})[\\s+]*(\\d{1,2})$")
 
     @EventHandler
@@ -51,7 +51,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
         }
         if (event.groupId != 604946573L) {
             //bot test group
-            return
+            //return
         }
         // bot响应的信息
         var messageBuilder = MessageBuilder()
@@ -91,11 +91,12 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             player.guest = 0
 
             val currentQueue = arcadeQueueService.pushPlayerToQueue(event.groupId, arcade.name, event.senderId, player)
-            messageBuilder.add("您已登记加入 ${arcade.name} 队列。").newLine()
+            messageBuilder.add("您已加入 ${arcade.name} 的排队队列。").newLine()
                 .add("当前队列人数: ${currentQueue.size}").newLine()
-                .add("当您上机完毕后请输入\"我打完了\"").newLine()
+                .add("当您上机完毕后请输入\"我打完了\"来回到队列末尾").newLine()
                 .add("退出队列请输入\"退勤\"").newLine()
-                .add("更多帮助说明: http://showdoc.crazykid.cn/web/#/5/24")
+                .add("更多帮助说明: http://showdoc.crazykid.cn/web/#/5/24").newLine()
+                .add("开发中功能, 有bug也请不要意外:)")
             event.httpApi.sendGroupMsg(event.groupId, messageBuilder.toString())
 
             val queueMessage = MessageBuilder()
@@ -536,6 +537,10 @@ class GroupMessageArcadeQueueListener : IcqListener() {
                     message.add(" (暂离 已等待${player.keepIndexCount}回)")
                 }
                 atBeforeIndex++
+            } else {
+                if (player.keepIndexCount > 0) {
+                    message.add(" (已等待${player.keepIndexCount}回)")
+                }
             }
             index++
         }

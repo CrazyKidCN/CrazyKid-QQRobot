@@ -172,6 +172,8 @@ class ArcadeQueueServiceImpl : IArcadeQueueService {
         resetStatus: Boolean
     ): MutableList<ArcadeQueuePlayer> {
         val queue = this.getQueue(groupNumber, arcadeName)
+        // 拷贝队列, 稍后比对改动后的队列, 来增加玩家的"已保持回数"
+        val oldQueue = MutableList(queue.size) { index -> queue[index] }
         var index: Int;
         if ("我" == matchMsg) {
             index = queue.indexOfFirst { it.qqNumber == qqNumber }
@@ -186,7 +188,15 @@ class ArcadeQueueServiceImpl : IArcadeQueueService {
         if (resetStatus) {
             removePlayer.status = 1
         }
+        // 回到队尾的玩家已等待回数重置
+        removePlayer.keepIndexCount = 0
         queue.add(removePlayer)
+        // 判断增加"已保持回数
+        queue.forEachIndexed { index, player ->
+            if (oldQueue[index].qqNumber == player.qqNumber) {
+                player.keepIndexCount++
+            }
+        }
         this.saveQueue(groupNumber, arcadeName, qqNumber, queue, true)
         return queue
     }
