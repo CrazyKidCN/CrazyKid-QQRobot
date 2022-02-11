@@ -5,6 +5,7 @@ import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.message.EventGroupMessage
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentAt
+import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.entity.Arcade
 import cn.crazykid.qqrobot.entity.ArcadeQueuePlayer
 import cn.crazykid.qqrobot.exception.OperateFailedException
@@ -55,7 +56,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
         }
         // bot响应的信息
         var messageBuilder = MessageBuilder()
-        //.add(ComponentReply(event.messageId))
+            .add(ComponentReply(event.messageId))
 
         // 接收到的信息
         val message = event.getMessage().trim()
@@ -75,7 +76,8 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             if (playerQueueInfo != null) {
                 event.httpApi.sendGroupMsg(
                     event.groupId,
-                    messageBuilder.add("您已经在 ${playerQueueInfo.arcadeName} 的队列中, 无法重复加入, 如需退出队列请输入\"退勤\"").toString()
+                    messageBuilder.add("您已经在 ${playerQueueInfo.arcadeName} 的队列中, 无法重复加入, 如需退出队列请输入\"退勤\"或\"走了\"")
+                        .toString()
                 )
                 return
             }
@@ -94,7 +96,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             messageBuilder.add("您已加入 ${arcade.name} 的排队队列。").newLine()
                 .add("当前队列人数: ${currentQueue.size}").newLine()
                 .add("当您上机完毕后请输入\"我打完了\"来回到队列末尾").newLine()
-                .add("退出队列请输入\"退勤\"").newLine()
+                .add("退出队列请输入\"退勤\"或\"走了\"").newLine()
                 .add("更多帮助说明: http://showdoc.crazykid.cn/web/#/5/24").newLine()
                 .add("开发中功能, 有bug也请不要意外:)")
             event.httpApi.sendGroupMsg(event.groupId, messageBuilder.toString())
@@ -111,9 +113,15 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             // 根据机厅名获取机厅 获取不到则终止
             val arcade: Arcade = arcadeQueueService.getArcade(matchMsg, event.groupId) ?: return
 
+            val playerQueueInfo = arcadeQueuePlayerService.getPlayerQueueInfo(event.senderId)
+            if (playerQueueInfo == null || playerQueueInfo.arcadeName != arcade.name) {
+                //event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你不在队列里, 无法进行该操作").toString())
+                return
+            }
+
             val player = ArcadeQueuePlayer()
             player.nickname = "路人"
-            player.qqNumber = 114514L
+            player.qqNumber = System.currentTimeMillis()
             player.groupNumber = event.groupId
             player.arcadeName = arcade.name
             player.status = 1
@@ -126,7 +134,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
                 .add("当前队列人数: ${currentQueue.size}").newLine()
                 .add("当路人打完后请输入\"<数字>打完了\"").newLine()
                 .add("路人走了请输入\"<数字>走了\"").newLine()
-                .add("P.S 数字表示路人所在队列位置")
+                .add("(数字表示路人所在队列位置)")
             event.httpApi.sendGroupMsg(event.groupId, messageBuilder.toString())
             return
         }
@@ -139,7 +147,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             }
             val playerQueueInfo = arcadeQueuePlayerService.getPlayerQueueInfo(event.senderId)
             if (playerQueueInfo == null) {
-                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你都没参加排队, 凑什么热闹").toString())
+                //event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你不在队列里, 无法进行该操作").toString())
                 return
             }
 
@@ -151,7 +159,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
                     playerQueueInfo.arcadeName,
                     true
                 )
-                messageBuilder.add("已将").add(if (matchMsg == "我") "您" else "${matchMsg}号位").add("归到队列末尾。");
+                messageBuilder.add("已将").add(if (matchMsg == "我") "您" else "${matchMsg}号位").add("移到队列末尾。");
                 event.httpApi.sendGroupMsg(event.groupId, messageBuilder.toString())
 
                 messageBuilder = MessageBuilder().add("当前队列:").add(this.buildQueueStringMessage(currentQueueList, true))
@@ -172,7 +180,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             }
             val playerQueueInfo = arcadeQueuePlayerService.getPlayerQueueInfo(event.senderId)
             if (playerQueueInfo == null) {
-                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你都没参加排队, 凑什么热闹").toString())
+                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你不在队列里, 无法进行该操作").toString())
                 return
             }
 
@@ -232,7 +240,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             }
             val playerQueueInfo = arcadeQueuePlayerService.getPlayerQueueInfo(event.senderId)
             if (playerQueueInfo == null) {
-                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你都没参加排队, 凑什么热闹").toString())
+                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你不在队列里, 无法进行该操作").toString())
                 return
             }
             // 获取当前队列
@@ -242,12 +250,10 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             if (self) {
                 // 获取自己在队列中的位置
                 currentQueueList.forEachIndexed { index, player ->
-                    if (player.qqNumber == event.senderId) {
+                    if (player.qqNumber.equals(event.senderId)) {
                         position = index
                         return@forEachIndexed
                     }
-                    event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("发生错误: 没有在队列中找到您").toString())
-                    return
                 }
             } else {
                 position = matchMsg.toInt()
@@ -256,6 +262,10 @@ class GroupMessageArcadeQueueListener : IcqListener() {
                     return
                 }
                 position = position!! - 1;
+            }
+            if (position == null) {
+                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("发生错误: 没有在队列中找到您").toString())
+                return
             }
 
             val leavePlayer = currentQueueList[position!!]
@@ -295,7 +305,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             }
             val playerQueueInfo = arcadeQueuePlayerService.getPlayerQueueInfo(event.senderId)
             if (playerQueueInfo == null) {
-                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你都没参加排队, 凑什么热闹").toString())
+                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你不在队列里, 无法进行该操作").toString())
                 return
             }
             // 获取当前队列
@@ -305,12 +315,10 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             if (self) {
                 // 获取自己在队列中的位置
                 currentQueueList.forEachIndexed { index, player ->
-                    if (player.qqNumber == event.senderId) {
+                    if (player.qqNumber.equals(event.senderId)) {
                         position = index
                         return@forEachIndexed
                     }
-                    event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("发生错误: 没有在队列中找到您").toString())
-                    return
                 }
             } else {
                 position = matchMsg.toInt()
@@ -319,6 +327,10 @@ class GroupMessageArcadeQueueListener : IcqListener() {
                     return
                 }
                 position = position!! - 1;
+            }
+            if (position == null) {
+                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("发生错误: 没有在队列中找到您").toString())
+                return
             }
 
             val backPlayer = currentQueueList[position!!]
@@ -351,7 +363,6 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             var self = false
             matchMsg = matchGroups[1]
             if (matchMsg.isNullOrBlank()) {
-                // 自己暂离
                 self = true
             }
             if (!self && !this.isNumeric(matchMsg)) {
@@ -359,7 +370,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             }
             val playerQueueInfo = arcadeQueuePlayerService.getPlayerQueueInfo(event.senderId)
             if (playerQueueInfo == null) {
-                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你都没参加排队, 凑什么热闹").toString())
+                //event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你不在队列里, 无法进行该操作").toString())
                 return
             }
             // 获取当前队列
@@ -369,12 +380,10 @@ class GroupMessageArcadeQueueListener : IcqListener() {
             if (self) {
                 // 获取自己在队列中的位置
                 currentQueueList.forEachIndexed { index, player ->
-                    if (player.qqNumber == event.senderId) {
+                    if (player.qqNumber.equals(event.senderId)) {
                         position = index
                         return@forEachIndexed
                     }
-                    event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("发生错误: 没有在队列中找到您").toString())
-                    return
                 }
             } else {
                 position = matchMsg.toInt()
@@ -383,6 +392,10 @@ class GroupMessageArcadeQueueListener : IcqListener() {
                     return
                 }
                 position = position!! - 1;
+            }
+            if (position == null) {
+                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("发生错误: 没有在队列中找到您").toString())
+                return
             }
 
             val quitPlayer = currentQueueList[position!!]
@@ -402,7 +415,8 @@ class GroupMessageArcadeQueueListener : IcqListener() {
                     true
                 )
             )
-            messageBuilder.add("已退出队列。")
+            messageBuilder.add("已退出队列。").newLine()
+                .add(playerQueueInfo.arcadeName).add(" 当前队列人数: ").add(afterQueueList.size)
             event.httpApi.sendGroupMsg(event.groupId, messageBuilder.toString())
             return
         }
@@ -430,7 +444,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
 
             val playerQueueInfo = arcadeQueuePlayerService.getPlayerQueueInfo(event.senderId)
             if (playerQueueInfo == null) {
-                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你都没参加排队, 凑什么热闹").toString())
+                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你不在队列里, 无法进行该操作").toString())
                 return
             }
 
@@ -470,7 +484,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
         if (message == "撤销" || message == "撤回") {
             val playerQueueInfo = arcadeQueuePlayerService.getPlayerQueueInfo(event.senderId)
             if (playerQueueInfo == null) {
-                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你都没参加排队, 凑什么热闹").toString())
+                event.httpApi.sendGroupMsg(event.groupId, messageBuilder.add("你不在队列里, 无法进行该操作").toString())
                 return
             }
 
@@ -548,7 +562,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
     }
 
     private fun buildPlayerName(qqNumber: Long, qqName: String, senderId: Long, guest: Int, at: Boolean): String {
-        if (qqNumber == senderId) {
+        if (qqNumber.equals(senderId)) {
             return "您"
         }
         return if (at && guest == 0) {

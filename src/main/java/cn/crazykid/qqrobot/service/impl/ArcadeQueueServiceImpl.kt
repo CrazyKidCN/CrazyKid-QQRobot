@@ -184,17 +184,20 @@ class ArcadeQueueServiceImpl : IArcadeQueueService {
             // 报错
             throw OperateFailedException(true, "给定的数字超出队列长度")
         }
+        if (index == queue.size - 1) {
+            throw OperateFailedException(true, "已经在队列末尾了, 无需重复操作")
+        }
         val removePlayer = queue.removeAt(index)
         if (resetStatus) {
             removePlayer.status = 1
         }
-        // 回到队尾的玩家已等待回数重置
-        removePlayer.keepIndexCount = 0
         queue.add(removePlayer)
         // 判断增加"已保持回数
         queue.forEachIndexed { index, player ->
             if (oldQueue[index].qqNumber == player.qqNumber) {
                 player.keepIndexCount++
+            } else {
+                player.keepIndexCount = 0
             }
         }
         this.saveQueue(groupNumber, arcadeName, qqNumber, queue, true)
