@@ -233,6 +233,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
 
             ThreadUtil.execute {
                 println("猜歌线程名: " + Thread.currentThread().name)
+                group.thread = Thread.currentThread()
                 try {
                     group.running = true
                     group.maimaiMusic = GroupMessageRandomMaimaiMusicListener.maidata.random()
@@ -264,8 +265,6 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
                     }
 
                     messageList.add("这首歌的分类是 ${group.maimaiMusic!!.category}")
-                    messageList.add("这首歌的作曲是 ${group.maimaiMusic!!.artist}")
-                    messageList.add("这首歌的稼动版本是 ${group.maimaiMusic!!.version}")
 
                     if (group.maimaiMusic!!.levMas == null) {
                         messageList.add("这首歌的DX紫谱等级是 ${group.maimaiMusic!!.dxLevMas}")
@@ -278,6 +277,9 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
                             messageList.add("这首歌的标准紫谱等级是 ${group.maimaiMusic!!.levMas}")
                         }
                     }
+
+                    messageList.add("这首歌的稼动版本是 ${group.maimaiMusic!!.version}")
+                    messageList.add("这首歌的作曲是 ${group.maimaiMusic!!.artist}")
 
                     val path = PathUtil.getClassPath() + "temp/"
                     val coverFile: File = HttpUtil.downloadFileFromUrl(
@@ -306,7 +308,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
                     ThreadUtil.safeSleep(10000)
 
                     for (i in messageList.indices) {
-                        if (!group.running) {
+                        if (!group.running || group.thread!!.name != Thread.currentThread().name) {
                             throw InterruptedException()
                         }
                         event.httpApi.sendGroupMsg(event.groupId, "(${i + 1}/${messageList.size}) ${messageList[i]}")
@@ -314,7 +316,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
                     }
                     ThreadUtil.safeSleep(20000)
 
-                    if (!group.running) {
+                    if (!group.running || group.thread!!.name != Thread.currentThread().name) {
                         throw InterruptedException()
                     }
 
@@ -325,8 +327,9 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
                     Console.log("线程停止异常捕获")
                 } finally {
                     Console.log("finally块复位")
-                    group.running = false
-                    group.lastRunTime = Date()
+                    if (group.thread!!.name == Thread.currentThread().name) {
+                        group.onGameEnd()
+                    }
                 }
             }
         }
@@ -343,17 +346,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
                     .newLine()
                     .add(ComponentImage(group.coverFile.toString(), true))
                 event.httpApi.sendGroupMsg(event.groupId, messageBuilder.toString())
-
-                // 停止线程
-                /*val threads = ThreadUtil.getThreads()
-                for (thread in threads) {
-                    Console.log(thread.name)
-                    if (thread.name == group.thread!!.name) {
-                        thread.interrupt()
-                        Console.log("猜中, 停止线程" + thread.name)
-                    }
-                }*/
-                group.running = false
+                group.onGameEnd()
             }
         }
     }
@@ -403,6 +396,11 @@ class Group {
     var maimaiMusic: MaimaiMusic? = null
     var songAliases: MutableList<String>? = null
     var lastRunTime: Date? = null
+
+    fun onGameEnd() {
+        this.running = false
+        this.lastRunTime = Date()
+    }
 }
 
 fun main() {
