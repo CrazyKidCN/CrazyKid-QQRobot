@@ -26,3 +26,7 @@ arcadeCardCounter:
 group:
   recall:
     mute: false # 群友撤回是否禁言
+
+arcaea:
+  enable: false
+  botarcapi:
