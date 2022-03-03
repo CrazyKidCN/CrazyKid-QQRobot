@@ -15,7 +15,7 @@ interface IArcaeaScoreProberService {
     /**
      * 查询 QQ 号绑定的 ArcaeaId
      */
-    fun getArcaeaIdByQQ(qqNumber: Long)
+    fun getArcaeaIdByQQ(qqNumber: Long): Long?
 
     /**
      * 根据 Arcaea Id 查询 Arcaea 信息

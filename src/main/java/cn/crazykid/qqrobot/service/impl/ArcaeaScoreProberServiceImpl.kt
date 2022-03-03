@@ -22,8 +22,8 @@ class ArcaeaScoreProberServiceImpl : IArcaeaScoreProberService {
         TODO("Not yet implemented")
     }
 
-    override fun getArcaeaIdByQQ(qqNumber: Long) {
-        TODO("Not yet implemented")
+    override fun getArcaeaIdByQQ(qqNumber: Long): Long? {
+        return arcaeaBindDao.getByQQ(qqNumber)?.arcId
     }
 
     override fun getArcaeaInfo(arcaeaId: Long) {

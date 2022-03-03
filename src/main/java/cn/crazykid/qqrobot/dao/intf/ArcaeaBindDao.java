@@ -11,4 +11,5 @@ import cn.org.atool.fluent.mybatis.base.IBaseDao;
  * <p/>@author Powered By Fluent Mybatis
  */
 public interface ArcaeaBindDao extends IBaseDao<ArcaeaBind> {
+    ArcaeaBind getByQQ(Long qqNumber);
 }

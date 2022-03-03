@@ -2,6 +2,8 @@ package cn.crazykid.qqrobot.dao.impl;
 
 import cn.crazykid.qqrobot.dao.base.ArcaeaBindBaseDao;
 import cn.crazykid.qqrobot.dao.intf.ArcaeaBindDao;
+import cn.crazykid.qqrobot.entity.ArcaeaBind;
+import cn.crazykid.qqrobot.wrapper.ArcaeaBindQuery;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -13,4 +15,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ArcaeaBindDaoImpl extends ArcaeaBindBaseDao implements ArcaeaBindDao {
+    @Override
+    public ArcaeaBind getByQQ(Long qqNumber) {
+        return mapper.findOne(new ArcaeaBindQuery()
+                .where.qqNumber().eq(qqNumber).end());
+    }
 }
