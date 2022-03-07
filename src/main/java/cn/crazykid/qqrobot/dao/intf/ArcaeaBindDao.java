@@ -12,4 +12,6 @@ import cn.org.atool.fluent.mybatis.base.IBaseDao;
  */
 public interface ArcaeaBindDao extends IBaseDao<ArcaeaBind> {
     ArcaeaBind getByQQ(Long qqNumber);
+
+    void bindArcaeaId(long qqNumber, long arcaeaId);
 }

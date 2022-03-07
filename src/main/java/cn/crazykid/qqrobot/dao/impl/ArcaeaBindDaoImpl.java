@@ -20,4 +20,19 @@ public class ArcaeaBindDaoImpl extends ArcaeaBindBaseDao implements ArcaeaBindDa
         return mapper.findOne(new ArcaeaBindQuery()
                 .where.qqNumber().eq(qqNumber).end());
     }
+
+    @Override
+    public void bindArcaeaId(long qqNumber, long arcaeaId) {
+        ArcaeaBind arcBind = this.getByQQ(qqNumber);
+        if (arcBind == null) {
+            arcBind = new ArcaeaBind() {{
+                setQqNumber(qqNumber);
+                setArcId(arcaeaId);
+            }};
+            this.save(arcBind);
+        } else {
+            arcBind.setArcId(arcaeaId);
+            this.updateById(arcBind);
+        }
+    }
 }

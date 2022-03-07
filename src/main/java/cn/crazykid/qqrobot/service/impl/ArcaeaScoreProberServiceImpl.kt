@@ -19,7 +19,7 @@ class ArcaeaScoreProberServiceImpl : IArcaeaScoreProberService {
     private var api: String? = null
 
     override fun bindArcaeaId(qqNumber: Long, arcaeaId: Long) {
-        TODO("Not yet implemented")
+        arcaeaBindDao.bindArcaeaId(qqNumber, arcaeaId)
     }
 
     override fun getArcaeaIdByQQ(qqNumber: Long): Long? {
