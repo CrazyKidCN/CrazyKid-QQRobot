@@ -370,7 +370,7 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
         for (csvRow in rows) {
             //\t分割, 第一个是歌曲完整名称, 后面是别名
             for (str in csvRow.rawList) {
-                val split = str.split("\t")
+                val split = StrUtil.splitTrim(str, "\t")
                 if (split.size > 1) {
                     split.forEachIndexed { index, songName ->
                         if (index > 0) {
