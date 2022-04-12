@@ -311,12 +311,16 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                 ) {
                     val operator =
                         if (event.groupSender.info.card.isNotEmpty()) event.groupSender.info.card else event.groupSender.info.nickname
+                    val oldCardNum = arcade.cardNum
                     when (operate) {
                         "=", "＝" -> {
                             operateType = 3
                             setCard(arcade, number, operator)
                         }
                         "+", "＋", "加" -> {
+                            if (number == 0) {
+                                return
+                            }
                             if (number > 10) {
                                 m.add("一次不能操作多于10张卡")
                                 sendGroupMsg(event, event.groupId, m.toString(), 1000)
@@ -326,6 +330,9 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                             addCard(arcade, number, operator)
                         }
                         else -> {
+                            if (number == 0) {
+                                return
+                            }
                             if (arcade.cardNum < number) {
                                 m.add(arcade.name).add("现在").add(arcade.cardNum).add("卡, 不够减!")
                                 sendGroupMsg(event, event.groupId, m.toString(), 1000)
@@ -345,7 +352,11 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                             event.httpApi.sendGroupMsg(event.groupId, mb.toString())
                         }
                     }
-                    m.add("更新成功! ")
+                    if (oldCardNum != arcade.cardNum) {
+                        m.add("更新成功! ")
+                    } else {
+                        m.add("${cardUnit}数没有变化。")
+                    }
                     if (operateType == 1 || operateType == 2) {
                         if (helpGroupUser != null) {
                             m.add("为 ")
