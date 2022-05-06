@@ -8,9 +8,11 @@ import cc.moecraft.icq.sender.message.components.ComponentAt
 import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.entity.Arcade
 import cn.crazykid.qqrobot.entity.ArcadeQueuePlayer
+import cn.crazykid.qqrobot.enum.FeatureEnum
 import cn.crazykid.qqrobot.exception.OperateFailedException
 import cn.crazykid.qqrobot.service.IArcadeQueuePlayerService
 import cn.crazykid.qqrobot.service.IArcadeQueueService
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.util.ReUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -32,6 +34,9 @@ class GroupMessageArcadeQueueListener : IcqListener() {
     @Autowired
     private lateinit var arcadeQueuePlayerService: IArcadeQueuePlayerService
 
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     @Value("\${arcadeCardCounter.enable:false}")
     private var isEnable: Boolean = false
 
@@ -47,7 +52,7 @@ class GroupMessageArcadeQueueListener : IcqListener() {
 
     @EventHandler
     fun event(event: EventGroupMessage) {
-        if (!isEnable) {
+        if (!isEnable || !featureService.isFeatureEnable(event.groupId, FeatureEnum.CARD_QUEUE)) {
             return
         }
         if (event.groupId != 604946573L) {
