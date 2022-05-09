@@ -5,9 +5,12 @@ import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.message.EventGroupMessage
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentImage
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.util.ReUtil
 import cn.hutool.http.HttpRequest
 import com.alibaba.fastjson.JSON
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.text.DecimalFormat
 
@@ -22,8 +25,15 @@ import java.text.DecimalFormat
  */
 @Component
 class GroupMessageBilibiliParserListener : IcqListener() {
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     @EventHandler
     fun event(event: EventGroupMessage) {
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.BILIBILI_URL_PARSER)) {
+            return
+        }
+
         var videoUrl: String? = null
 
         // 如果是json消息
