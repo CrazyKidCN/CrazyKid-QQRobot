@@ -6,8 +6,11 @@ import cc.moecraft.icq.event.events.message.EventGroupMessage
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentAt
 import cc.moecraft.icq.sender.message.components.ComponentReply
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.lang.WeightRandom.WeightObj
 import cn.hutool.core.util.RandomUtil
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -19,11 +22,18 @@ import java.util.*
  */
 @Component
 class GroupMessageBotAtListener : IcqListener() {
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     /**
      * At机器人禁言事件
      */
     @EventHandler
     fun event(event: EventGroupMessage) {
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.BOT_AT)) {
+            return
+        }
+
         // 号主就是牛逼
         if (event.senderId == 694372459L) {
             return
