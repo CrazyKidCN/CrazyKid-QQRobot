@@ -8,7 +8,9 @@ import cc.moecraft.icq.sender.message.components.ComponentReply
 import cc.moecraft.icq.user.GroupUser
 import cn.crazykid.qqrobot.dao.intf.ArcadeDao
 import cn.crazykid.qqrobot.entity.Arcade
+import cn.crazykid.qqrobot.enum.FeatureEnum
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCounterListener.Companion.getMessageCountInGroup
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.crazykid.qqrobot.util.ArcadeQueueCardUtil
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.lang.Console
@@ -41,6 +43,9 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
 
     @Autowired
     private lateinit var jedis: Jedis
+
+    @Autowired
+    private lateinit var featureService: IFeatureService
 
     private val selectCardNumPattern = Pattern.compile("^(.*?)(现在)?(几|多少)([个张位])?([卡人神爷爹])[?？]?$")
     private val selectCardNumPattern2 = Pattern.compile("^(.*)[jJ几][kK卡]?$")
@@ -155,6 +160,9 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
         if (!isEnable) {
             return
         }
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.CARD_COUNTER)) {
+            return
+        }
         val message = event.getMessage().trim()
         if ("j" == message || "几卡" == message || "几人" == message || "几爷" == message || "几神" == message || "查卡" == message) {
             val arcadeList = getArcadeList(event.groupId, false)
@@ -231,7 +239,10 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
             for (arcade in arcadeList) {
                 if ((arcade.name == arcadeName || getArcadeAlias(arcade).contains(arcadeName)) && (getArcadeGroupNumber(
                         arcade
-                    ).contains(event.groupId) || getArcadeGroupNumber(arcade).isEmpty())
+                    ).contains(event.groupId) || (getArcadeGroupNumber(arcade).isEmpty() && featureService.isFeatureEnable(
+                        event.groupId,
+                        FeatureEnum.CARD_COUNTER_ESTER_EGG
+                    )))
                 ) {
                     m.add(arcade.name).add("现在").add(arcade.cardNum).add(cardUnit)
                     if (arcade.machineNum!! > 1 && arcade.cardNum != 0) {
@@ -307,7 +318,10 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                 var operateType = 0
                 if ((arcade.name == arcadeName || getArcadeAlias(arcade).contains(arcadeName)) && (getArcadeGroupNumber(
                         arcade
-                    ).contains(event.groupId) || getArcadeGroupNumber(arcade).isEmpty())
+                    ).contains(event.groupId) || (getArcadeGroupNumber(arcade).isEmpty() && featureService.isFeatureEnable(
+                        event.groupId,
+                        FeatureEnum.CARD_COUNTER_ESTER_EGG
+                    )))
                 ) {
                     val operator =
                         if (event.groupSender.info.card.isNotEmpty()) event.groupSender.info.card else event.groupSender.info.nickname
@@ -403,7 +417,10 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
             for (arcade in arcadeList) {
                 if ((arcade.name == arcadeName || getArcadeAlias(arcade).contains(arcadeName)) && (getArcadeGroupNumber(
                         arcade
-                    ).contains(event.groupId) || getArcadeGroupNumber(arcade).isEmpty())
+                    ).contains(event.groupId) || (getArcadeGroupNumber(arcade).isEmpty() && featureService.isFeatureEnable(
+                        event.groupId,
+                        FeatureEnum.CARD_COUNTER_ESTER_EGG
+                    )))
                 ) {
                     m.add(arcade.address)
                     sendGroupMsg(event, event.groupId, m.toString(), 1000)
@@ -423,7 +440,10 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
             for (arcade in arcadeList) {
                 if ((arcade.name == arcadeName || getArcadeAlias(arcade).contains(arcadeName)) && (getArcadeGroupNumber(
                         arcade
-                    ).contains(event.groupId) || getArcadeGroupNumber(arcade).isEmpty())
+                    ).contains(event.groupId) || (getArcadeGroupNumber(arcade).isEmpty() && featureService.isFeatureEnable(
+                        event.groupId,
+                        FeatureEnum.CARD_COUNTER_ESTER_EGG
+                    )))
                 ) {
                     sendGroupMsg(event, event.groupId, getHistory(arcade.name!!), 2000)
                     return
