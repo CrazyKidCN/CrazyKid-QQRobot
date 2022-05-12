@@ -3,7 +3,10 @@ package cn.crazykid.qqrobot.listener.group.message
 import cc.moecraft.icq.event.EventHandler
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.message.EventGroupMessage
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.util.RandomUtil
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /**
@@ -20,11 +23,18 @@ class GroupMessageBotRepeatListener : IcqListener() {
     // 保存群最后一条消息
     private val repeatMessageMap: MutableMap<Long, String> = mutableMapOf()
 
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     /**
      * 复读事件
      */
     @EventHandler
     fun event(event: EventGroupMessage) {
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.BOT_REPEAT)) {
+            return
+        }
+
         if (!repeatMessageMap.containsKey(event.groupId)) {
             repeatMessageMap[event.groupId] = event.rawMessage
             repeatMessageCountMap[event.groupId] = 0
