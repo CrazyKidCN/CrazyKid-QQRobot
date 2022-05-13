@@ -4,7 +4,10 @@ import cc.moecraft.icq.event.EventHandler
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.message.EventGroupMessage
 import cc.moecraft.icq.sender.message.components.ComponentAt
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.util.ReUtil
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /**
@@ -15,6 +18,9 @@ import org.springframework.stereotype.Component
  */
 @Component
 class GroupMessageControlRecallListener : IcqListener() {
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     /**
      * 控制bot撤回自己的信息
      * 用法: 回复bot发送的信息, 并带有 @bot + "撤回" 或 "recall" 关键字
@@ -22,9 +28,16 @@ class GroupMessageControlRecallListener : IcqListener() {
     @EventHandler
     fun event(event: EventGroupMessage) {
         // 不是群管或者不是号主不能使用
-        if (!event.isAdmin(event.senderId) && event.senderId != 694372459L) {
-            return
+        if (event.senderId != 694372459L) {
+            if (!event.isAdmin(event.senderId) || !featureService.isFeatureEnable(
+                    event.groupId,
+                    FeatureEnum.BOT_RECALL_CTRL
+                )
+            ) {
+                return
+            }
         }
+
         val atMessage = ComponentAt(event.getSelfId()).toString()
         event.bot.logger.debug("控制撤回消息事件,收到消息: {}", event.getMessage())
         if (event.getMessage().contains(atMessage) && event.getMessage().contains("[CQ:reply") &&
