@@ -9,6 +9,8 @@ import cc.moecraft.icq.sender.message.components.ComponentImage
 import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.entity.GuessMaimaiSongConfig
 import cn.crazykid.qqrobot.entity.MaimaiMusic
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.crazykid.qqrobot.util.PathUtil
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.img.ImgUtil
@@ -41,6 +43,9 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
     @Autowired
     private lateinit var jedis: Jedis
 
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     companion object {
         val groupList = mutableListOf<Group>()
         val songAliases: MutableMap<String, MutableList<String>> = mutableMapOf()
@@ -51,6 +56,10 @@ class GroupMessageGuessMaimaiSongListener() : IcqListener() {
     @EventHandler
     fun event(event: EventGroupMessage) {
         if (!isEnable) {
+            return
+        }
+
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.MAIMAI_GUESS_SONG)) {
             return
         }
 
