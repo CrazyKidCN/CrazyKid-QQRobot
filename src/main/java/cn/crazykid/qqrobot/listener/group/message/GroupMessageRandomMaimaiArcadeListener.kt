@@ -7,6 +7,8 @@ import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.dao.intf.GroupDao
 import cn.crazykid.qqrobot.entity.WahlapMaimaiArcade
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.util.StrUtil
 import cn.hutool.http.HttpUtil
 import com.alibaba.fastjson.JSON
@@ -28,12 +30,18 @@ class GroupMessageRandomMaimaiArcadeListener : IcqListener() {
     @Autowired
     private lateinit var jedis: Jedis
 
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     companion object {
         const val WAHLAP_MAIMAI_ARCADE_LIST_CACHE_NAME = "WahlapMaimaiArcadeList"
     }
 
     @EventHandler
     fun event(event: EventGroupMessage) {
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.MAIMAI_ARCADE_RANDOM)) {
+            return
+        }
         if (!event.message.startsWith("随个机厅")) {
             return
         }
