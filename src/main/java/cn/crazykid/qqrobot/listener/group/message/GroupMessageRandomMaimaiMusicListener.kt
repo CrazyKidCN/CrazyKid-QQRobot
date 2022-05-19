@@ -7,11 +7,14 @@ import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentImage
 import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.entity.MaimaiMusic
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.util.RandomUtil
 import cn.hutool.core.util.ReUtil
 import com.alibaba.fastjson.JSON
 import com.google.common.collect.Lists
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.regex.Pattern
 
@@ -24,6 +27,9 @@ import java.util.regex.Pattern
 @Component
 class GroupMessageRandomMaimaiMusicListener : IcqListener() {
 
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     companion object {
         val maidata: MutableList<MaimaiMusic> = Lists.newArrayList()
     }
@@ -35,6 +41,10 @@ class GroupMessageRandomMaimaiMusicListener : IcqListener() {
 
     @EventHandler
     fun event(event: EventGroupMessage) {
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.MAIMAI_SONG_RANDOM)) {
+            return
+        }
+
         var level: String? = ReUtil.get(pattern, event.message, 3)
         val type: String? = ReUtil.get(pattern, event.message, 1)
         val category: String? = ReUtil.get(pattern, event.message, 2)
