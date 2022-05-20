@@ -5,8 +5,11 @@ import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.message.EventGroupMessage
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentReply
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.util.ObjectUtil
 import cn.hutool.core.util.RandomUtil
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.stream.Collectors
 
@@ -16,8 +19,15 @@ import java.util.stream.Collectors
  */
 @Component
 class GroupMessageRandomPickListener() : IcqListener() {
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     @EventHandler
     fun event(event: EventGroupMessage) {
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.RANDOM_PICKER)) {
+            return
+        }
+
         if (event.message.length > 21 || event.message.contains("[")) {
             return
         }
