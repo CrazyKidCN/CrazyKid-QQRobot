@@ -5,7 +5,10 @@ import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.notice.EventNoticeGroupHonor
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentAt
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
 import com.google.common.cache.CacheBuilder
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -23,8 +26,15 @@ class GroupHonorListener : IcqListener() {
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<Long, Int>()
 
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     @EventHandler
     fun event(event: EventNoticeGroupHonor) {
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.DRAGON_KING_MUTE)) {
+            return
+        }
+
         if (!event.isDragonKing) {
             return
         }
