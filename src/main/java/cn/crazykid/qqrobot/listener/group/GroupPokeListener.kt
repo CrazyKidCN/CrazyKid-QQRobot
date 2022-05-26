@@ -5,8 +5,11 @@ import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.notice.EventNoticeGroupPoke
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentAt
+import cn.crazykid.qqrobot.enum.FeatureEnum
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCountListener
+import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.util.RandomUtil
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /**
@@ -17,8 +20,15 @@ import org.springframework.stereotype.Component
  */
 @Component
 class GroupPokeListener : IcqListener() {
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     @EventHandler
     fun groupPoke(event: EventNoticeGroupPoke) {
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.POKE_MUTE)) {
+            return
+        }
+
         if (event.targetId != event.selfId) {
             // 戳的不是bot, 不响应.
             return
