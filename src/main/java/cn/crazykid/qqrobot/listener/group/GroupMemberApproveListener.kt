@@ -4,6 +4,9 @@ import cc.moecraft.icq.event.EventHandler
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.notice.groupmember.increase.EventNoticeGroupMemberApprove
 import cc.moecraft.icq.sender.message.MessageBuilder
+import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.service.IFeatureService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /**
@@ -14,6 +17,9 @@ import org.springframework.stereotype.Component
  */
 @Component
 class GroupMemberApproveListener : IcqListener() {
+    @Autowired
+    private lateinit var featureService: IFeatureService
+
     @EventHandler
     fun onEvent(event: EventNoticeGroupMemberApprove) {
         // bot自己进群, 刷新群缓存
@@ -25,6 +31,9 @@ class GroupMemberApproveListener : IcqListener() {
             }
             event.bot.logger.log("bot自己进了群, 刷新群缓存...")
             event.bot.accountManager.refreshCache()
+            return
+        }
+        if (!featureService.isFeatureEnable(event.groupId, FeatureEnum.JOIN_GROUP_NOTICE)) {
             return
         }
         val messageBuilder = MessageBuilder()
