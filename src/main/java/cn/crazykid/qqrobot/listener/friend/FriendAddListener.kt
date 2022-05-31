@@ -27,7 +27,7 @@ class FriendAddListener : IcqListener() {
         }
         event.httpApi.sendPrivateMsg(
             event.userId,
-            "欢迎添加 CrazyKid's BOT, 拉我进群请务必先加号主咨询, 勿直接拉, BOT会定期退掉不认识的群。号主QQ: 694372459"
+            "欢迎添加 CrazyKid's BOT, 拉我进群请务必先加号主咨询, 勿直接拉, 直接拉你啥功能都用不了。号主QQ: 694372459"
         )
     }
 }
