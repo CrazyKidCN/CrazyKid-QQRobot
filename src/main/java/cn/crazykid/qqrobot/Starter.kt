@@ -5,6 +5,7 @@ import cc.moecraft.icq.PicqConfig
 import cc.moecraft.icq.command.interfaces.IcqCommand
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.logger.environments.ColorSupportLevel
+import cn.crazykid.qqrobot.command.RollCommand
 import cn.crazykid.qqrobot.config.PicqBotXConfig
 import cn.crazykid.qqrobot.listener.HeartBeatListener
 import cn.crazykid.qqrobot.listener.LocalExceptionListener
@@ -28,6 +29,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @MapperScan(value = ["cn.crazykid.qqrobot.mapper"])
 @ConfigurationPropertiesScan
 open class Starter : CommandLineRunner {
+    @Autowired
+    private lateinit var rollCommand: RollCommand
+
     @Autowired
     private lateinit var heartBeatListener: HeartBeatListener
 
@@ -119,7 +123,9 @@ open class Starter : CommandLineRunner {
         /**
          * 要注册的指令
          */
-        val commands = arrayOf<IcqCommand>()
+        val commands = arrayOf<IcqCommand>(
+            rollCommand
+        )
 
         /**
          * 要注册的监听器
@@ -221,7 +227,7 @@ open class Starter : CommandLineRunner {
 
         // 注册指令
         // 从 v3.0.1.730 之后不会自动注册指令了, 因为效率太低 (≈4000ms), 而且在其他框架上有Bug
-        //bot.commandManager.registerCommands(*commands)
+        bot.commandManager.registerCommands(*commands)
 
         // Debug输出所有已注册的指令
         bot.logger.debug(bot.commandManager.commands.toString())

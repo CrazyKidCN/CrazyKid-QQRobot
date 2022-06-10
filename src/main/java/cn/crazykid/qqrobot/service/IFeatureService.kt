@@ -1,6 +1,6 @@
 package cn.crazykid.qqrobot.service
 
-import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.enums.FeatureEnum
 
 /**
  * @author meijinyu

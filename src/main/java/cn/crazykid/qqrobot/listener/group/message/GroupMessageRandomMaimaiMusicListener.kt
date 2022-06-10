@@ -7,7 +7,7 @@ import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentImage
 import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.entity.MaimaiMusic
-import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.enums.FeatureEnum
 import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.io.resource.ResourceUtil
 import cn.hutool.core.util.RandomUtil

@@ -3,7 +3,7 @@ package cn.crazykid.qqrobot.listener.group.message
 import cc.moecraft.icq.event.EventHandler
 import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.message.EventGroupMessage
-import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.enums.FeatureEnum
 import cn.crazykid.qqrobot.service.IFeatureService
 import cn.hutool.core.util.RandomUtil
 import org.springframework.beans.factory.annotation.Autowired

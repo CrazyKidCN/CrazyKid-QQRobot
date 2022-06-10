@@ -5,7 +5,7 @@ import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.icq.event.events.notice.EventNoticeGroupHonor
 import cc.moecraft.icq.sender.message.MessageBuilder
 import cc.moecraft.icq.sender.message.components.ComponentAt
-import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.enums.FeatureEnum
 import cn.crazykid.qqrobot.service.IFeatureService
 import com.google.common.cache.CacheBuilder
 import org.springframework.beans.factory.annotation.Autowired

@@ -4,7 +4,7 @@ import cn.crazykid.qqrobot.dao.intf.FeatureDao
 import cn.crazykid.qqrobot.dao.intf.FeatureGroupConfigDao
 import cn.crazykid.qqrobot.dao.intf.GroupDao
 import cn.crazykid.qqrobot.entity.FeatureGroupConfig
-import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.enums.FeatureEnum
 import cn.crazykid.qqrobot.service.IFeatureService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

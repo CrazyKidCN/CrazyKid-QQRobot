@@ -8,7 +8,7 @@ import cc.moecraft.icq.sender.message.components.ComponentReply
 import cc.moecraft.icq.user.GroupUser
 import cn.crazykid.qqrobot.dao.intf.ArcadeDao
 import cn.crazykid.qqrobot.entity.Arcade
-import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.enums.FeatureEnum
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCounterListener.Companion.getMessageCountInGroup
 import cn.crazykid.qqrobot.service.IFeatureService
 import cn.crazykid.qqrobot.util.ArcadeQueueCardUtil

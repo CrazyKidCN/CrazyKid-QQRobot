@@ -8,7 +8,7 @@ import cc.moecraft.icq.sender.message.components.ComponentAt
 import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.entity.Arcade
 import cn.crazykid.qqrobot.entity.ArcadeQueuePlayer
-import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.enums.FeatureEnum
 import cn.crazykid.qqrobot.exception.OperateFailedException
 import cn.crazykid.qqrobot.service.IArcadeQueuePlayerService
 import cn.crazykid.qqrobot.service.IArcadeQueueService

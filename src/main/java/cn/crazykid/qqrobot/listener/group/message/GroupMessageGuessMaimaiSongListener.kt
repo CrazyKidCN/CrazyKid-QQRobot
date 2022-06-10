@@ -9,7 +9,7 @@ import cc.moecraft.icq.sender.message.components.ComponentImage
 import cc.moecraft.icq.sender.message.components.ComponentReply
 import cn.crazykid.qqrobot.entity.GuessMaimaiSongConfig
 import cn.crazykid.qqrobot.entity.MaimaiMusic
-import cn.crazykid.qqrobot.enum.FeatureEnum
+import cn.crazykid.qqrobot.enums.FeatureEnum
 import cn.crazykid.qqrobot.service.IFeatureService
 import cn.crazykid.qqrobot.util.PathUtil
 import cn.hutool.core.date.DateUtil

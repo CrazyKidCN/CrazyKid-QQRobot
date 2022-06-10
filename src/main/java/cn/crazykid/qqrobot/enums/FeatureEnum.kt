@@ -1,10 +1,14 @@
-package cn.crazykid.qqrobot.enum
+package cn.crazykid.qqrobot.enums
 
 /**
  * @author meijinyu
  * @date 2022/5/4 11:41
  */
 enum class FeatureEnum(val code: String) {
+    // command
+    ROLL("roll"),
+
+    // listener
     CARD_COUNTER("card_counter"),
     CARD_COUNTER_ESTER_EGG("card_counter_ester_egg"),
     BILIBILI_URL_PARSER("bilibili_url_parser"),
