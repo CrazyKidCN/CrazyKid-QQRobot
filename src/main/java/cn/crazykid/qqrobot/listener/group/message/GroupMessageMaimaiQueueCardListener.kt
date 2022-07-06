@@ -368,6 +368,13 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                     }
                     if (oldCardNum != arcade.cardNum) {
                         m.add("更新成功! ")
+                        if (operateType == 3) {
+                            val cardChangeNum = arcade.cardNum - oldCardNum
+                            m.add(if (cardChangeNum > 0) "增加了" else "减少了")
+                                .add(kotlin.math.abs(cardChangeNum))
+                                .add(cardUnit)
+                                .add("。")
+                        }
                     } else {
                         m.add("${cardUnit}数没有变化。")
                     }
