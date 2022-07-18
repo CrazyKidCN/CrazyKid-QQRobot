@@ -122,9 +122,10 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
         jedis.expire(HISTORY_CACHE_NAME, cacheExpireSecond)
     }
 
-    private fun getHistory(arcadeName: String): String {
+    private fun getHistory(messageId: Long, arcadeName: String): String {
         val json: String? = jedis.hget(HISTORY_CACHE_NAME, arcadeName)
         val m = MessageBuilder()
+        m.add(ComponentReply(messageId))
         if (json.isNullOrBlank()) {
             m.add(arcadeName).add(" 暂无加减卡记录。")
         } else {
@@ -452,7 +453,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         FeatureEnum.CARD_COUNTER_ESTER_EGG
                     )))
                 ) {
-                    sendGroupMsg(event, event.groupId, getHistory(arcade.name!!), 2000)
+                    sendGroupMsg(event, event.groupId, getHistory(event.messageId, arcade.name!!), 2000)
                     return
                 }
             }
