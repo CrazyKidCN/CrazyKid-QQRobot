@@ -90,7 +90,7 @@ class MaimaiMusic {
                 this.category!!.contains("舞萌")
             }
             category.equals("新曲", true) -> {
-                this.version!!.contains("舞萌DX 2021")
+                this.version!!.contains("舞萌DX 2022")
             }
             else -> {
                 this.category!!.contains(category)
