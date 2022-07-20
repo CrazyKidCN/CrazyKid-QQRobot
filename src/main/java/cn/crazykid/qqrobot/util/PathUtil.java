@@ -26,6 +26,7 @@ public class PathUtil {
         if (path.endsWith(".jar")) {
             path = path.substring(0, path.lastIndexOf("/") + 1);
         }
+        System.out.println("getClassPath: " + path);
         return path;
     }
 

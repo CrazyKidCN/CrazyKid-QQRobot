@@ -1,7 +1,7 @@
 package cn.crazykid.qqrobot.enums
 
 /**
- * @author meijinyu
+ * @author CrazyKid
  * @date 2022/5/4 11:41
  */
 enum class FeatureEnum(val code: String) {

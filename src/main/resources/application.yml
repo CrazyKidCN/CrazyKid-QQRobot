@@ -30,3 +30,7 @@ group:
 arcaea:
   enable: false
   botarcapi:
+
+maimaiMusicDataApi:
+  divingFish: https://www.diving-fish.com/api/maimaidxprober/music_data
+  xrayAlias: # 自行找xray bot作者获取

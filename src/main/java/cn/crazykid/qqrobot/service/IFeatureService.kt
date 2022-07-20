@@ -3,7 +3,7 @@ package cn.crazykid.qqrobot.service
 import cn.crazykid.qqrobot.enums.FeatureEnum
 
 /**
- * @author meijinyu
+ * @author CrazyKid
  * @date 2022/5/4 13:16
  */
 interface IFeatureService {
