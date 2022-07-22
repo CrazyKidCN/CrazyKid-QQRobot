@@ -9,6 +9,7 @@ import cc.moecraft.icq.user.GroupUser
 import cn.crazykid.qqrobot.dao.intf.ArcadeDao
 import cn.crazykid.qqrobot.entity.Arcade
 import cn.crazykid.qqrobot.enums.FeatureEnum
+import cn.crazykid.qqrobot.listener.group.message.GroupMessageCounterListener.Companion.getMessageAtCountInGroup
 import cn.crazykid.qqrobot.listener.group.message.GroupMessageCounterListener.Companion.getMessageCountInGroup
 import cn.crazykid.qqrobot.service.IFeatureService
 import cn.crazykid.qqrobot.util.ArcadeQueueCardUtil
@@ -195,7 +196,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                 }
             }
             //m.add("其它: bot.crazykid.cn")
-            sendGroupMsg(event, event.groupId, m.toString(), 1000)
+            sendGroupMsg(event, event.groupId, m.toString())
             return
         }
         if ("机厅列表" == message) {
@@ -212,7 +213,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                     m.newLine()
                 }
             }
-            sendGroupMsg(event, event.groupId, m.toString(), 1000)
+            sendGroupMsg(event, event.groupId, m.toString())
             return
         }
 
@@ -268,7 +269,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         // 彩蛋不显示该提示
                         m.newLine().add("加减" + cardUnit + "数请发送\"" + arcadeName + "++\"或\"" + arcadeName + "--\"")
                     }
-                    sendGroupMsg(event, event.groupId, m.toString(), 1000)
+                    sendGroupMsg(event, event.groupId, m.toString())
                     return
                 }
             }
@@ -338,7 +339,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                             }
                             if (number > 10) {
                                 m.add("一次不能操作多于10张卡")
-                                sendGroupMsg(event, event.groupId, m.toString(), 1000)
+                                sendGroupMsg(event, event.groupId, m.toString())
                                 return
                             }
                             operateType = 1
@@ -350,7 +351,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                             }
                             if (arcade.cardNum < number) {
                                 m.add(arcade.name).add("现在").add(arcade.cardNum).add("卡, 不够减!")
-                                sendGroupMsg(event, event.groupId, m.toString(), 1000)
+                                sendGroupMsg(event, event.groupId, m.toString())
                                 return
                             }
                             operateType = 2
@@ -408,7 +409,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                             m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit)
                         }
                     }
-                    sendGroupMsg(event, event.groupId, m.toString(), 1000)
+                    sendGroupMsg(event, event.groupId, m.toString())
                     return
                 }
             }
@@ -431,7 +432,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                     )))
                 ) {
                     m.add(arcade.address)
-                    sendGroupMsg(event, event.groupId, m.toString(), 1000)
+                    sendGroupMsg(event, event.groupId, m.toString())
                     return
                 }
             }
@@ -453,7 +454,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         FeatureEnum.CARD_COUNTER_ESTER_EGG
                     )))
                 ) {
-                    sendGroupMsg(event, event.groupId, getHistory(event.messageId, arcade.name!!), 2000)
+                    sendGroupMsg(event, event.groupId, getHistory(event.messageId, arcade.name!!))
                     return
                 }
             }
@@ -487,20 +488,25 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
         }
     }
 
-    private fun sendGroupMsg(event: EventGroupMessage, groupId: Long, message: String, sleepMillis: Long) {
+    private fun sendGroupMsg(event: EventGroupMessage, groupId: Long, message: String) {
         if (message.isBlank()) {
             return
         }
         GroupMessageCounterListener.GROUP_MAP.clear()
+        GroupMessageCounterListener.GROUP_AT_MAP.clear()
         val r = Runnable {
             var sendMsg = true
             if (437189122L == groupId) {
-                ThreadUtil.safeSleep(sleepMillis)
+                ThreadUtil.safeSleep(500)
                 sendMsg = getMessageCountInGroup(groupId, 1875425568L) == 0 // 牛意思bot
             } else if (486156320L == groupId) {
-                ThreadUtil.safeSleep(sleepMillis)
+                ThreadUtil.safeSleep(500)
                 sendMsg = getMessageCountInGroup(groupId, 2568226265L) == 0 // 占星铃铃
+            } else {
+                ThreadUtil.safeSleep(500)
+                sendMsg = getMessageAtCountInGroup(groupId, event.senderId) == 0;
             }
+
             if (sendMsg) {
                 event.httpApi.sendGroupMsg(groupId, message)
             }
