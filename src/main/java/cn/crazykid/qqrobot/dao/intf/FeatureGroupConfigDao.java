@@ -1,7 +1,10 @@
 package cn.crazykid.qqrobot.dao.intf;
 
 import cn.crazykid.qqrobot.entity.FeatureGroupConfig;
+import cn.crazykid.qqrobot.entity.dto.GroupFeatureConfigDTO;
 import cn.org.atool.fluent.mybatis.base.IBaseDao;
+
+import java.util.List;
 
 /**
  * FeatureGroupConfigDao: 数据操作接口
@@ -12,4 +15,6 @@ import cn.org.atool.fluent.mybatis.base.IBaseDao;
  */
 public interface FeatureGroupConfigDao extends IBaseDao<FeatureGroupConfig> {
     FeatureGroupConfig selectByGroupIdAndFeatureCode(Long groupId, String featureCode);
+
+    List<GroupFeatureConfigDTO> selectGroupFeatureConfigList(Long groupId);
 }

@@ -4,7 +4,9 @@ import cn.crazykid.qqrobot.dao.intf.FeatureDao
 import cn.crazykid.qqrobot.dao.intf.FeatureGroupConfigDao
 import cn.crazykid.qqrobot.dao.intf.GroupDao
 import cn.crazykid.qqrobot.entity.FeatureGroupConfig
+import cn.crazykid.qqrobot.entity.dto.GroupFeatureConfigDTO
 import cn.crazykid.qqrobot.enums.FeatureEnum
+import cn.crazykid.qqrobot.exception.OperateFailedException
 import cn.crazykid.qqrobot.service.IFeatureService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -59,5 +61,30 @@ class FeatureServiceImpl : IFeatureService {
 
         // 返回
         return featureConfig.enable == 1
+    }
+
+    override fun groupFeatureConfigList(groupId: Long): List<GroupFeatureConfigDTO> {
+        return featureGroupConfigDao.selectGroupFeatureConfigList(groupId)
+    }
+
+    override fun updateGroupFeatureConfig(groupId: Long, featureId: Int, enable: Int) {
+        val feature = featureDao.selectById(featureId) ?: throw OperateFailedException(true, "功能编号无效")
+        var featureConfig = featureGroupConfigDao.selectByGroupIdAndFeatureCode(groupId, feature.code)
+        if (featureConfig == null) {
+            // insert record
+            featureConfig = FeatureGroupConfig()
+                .setGroupId(groupId)
+                .setFeatureCode(feature.code)
+                .setEnable(enable)
+            featureGroupConfigDao.save<FeatureGroupConfigDao>(featureConfig)
+        } else {
+            // update record
+            featureConfig.enable = enable
+            featureGroupConfigDao.updateById(featureConfig)
+        }
+
+        // 写入缓存
+        val cacheKey = String.format(CACHE_KEY_PREFIX, feature.code, groupId)
+        jedis.setex(cacheKey, 60 * 60L * 24, enable.toString())
     }
 }
