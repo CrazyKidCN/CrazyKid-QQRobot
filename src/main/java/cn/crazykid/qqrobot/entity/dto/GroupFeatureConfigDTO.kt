@@ -7,5 +7,7 @@ package cn.crazykid.qqrobot.entity.dto
 class GroupFeatureConfigDTO {
     var id: Int? = null
     var title: String? = null
+    var desc: String? = null
+    var defaultEnable: Int? = null
     var enable: Int? = null
 }

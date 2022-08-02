@@ -31,7 +31,7 @@ public class FeatureGroupConfigDaoImpl extends FeatureGroupConfigBaseDao impleme
     public List<GroupFeatureConfigDTO> selectGroupFeatureConfigList(Long groupId) {
 
         FeatureQuery featureQuery = new FeatureQuery("f")
-                .select.id().title().end()
+                .select.id().title().desc().defaultEnable().end()
                 .where.showFlag().eq(1).end();
 
         FeatureGroupConfigQuery featureGroupConfigQuery = new FeatureGroupConfigQuery("fgc")

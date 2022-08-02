@@ -2,9 +2,8 @@ package cn.crazykid.qqrobot
 
 import cc.moecraft.icq.PicqBotX
 import cc.moecraft.icq.PicqConfig
-import cc.moecraft.icq.command.interfaces.IcqCommand
-import cc.moecraft.icq.event.IcqListener
 import cc.moecraft.logger.environments.ColorSupportLevel
+import cn.crazykid.qqrobot.command.FeatureCommand
 import cn.crazykid.qqrobot.command.RollCommand
 import cn.crazykid.qqrobot.config.PicqBotXConfig
 import cn.crazykid.qqrobot.listener.HeartBeatListener
@@ -31,6 +30,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 open class Starter : CommandLineRunner {
     @Autowired
     private lateinit var rollCommand: RollCommand
+
+    @Autowired
+    private lateinit var featureCommand: FeatureCommand
 
     @Autowired
     private lateinit var heartBeatListener: HeartBeatListener
@@ -123,14 +125,15 @@ open class Starter : CommandLineRunner {
         /**
          * 要注册的指令
          */
-        val commands = arrayOf<IcqCommand>(
-            rollCommand
+        val commands = arrayOf(
+            rollCommand,
+            featureCommand
         )
 
         /**
          * 要注册的监听器
          */
-        val listeners = arrayOf<IcqListener>(
+        val listeners = arrayOf(
             // 心跳事件监听
             heartBeatListener,
             // 本地异常事件监听
