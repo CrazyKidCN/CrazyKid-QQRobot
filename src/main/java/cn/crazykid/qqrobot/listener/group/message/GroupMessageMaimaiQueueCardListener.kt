@@ -183,7 +183,8 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                     if (floor == ceil) {
                         m.add(",机均").add(floor)
                     } else {
-                        m.add(",机均").add(floor).add("-").add(ceil)
+                        //m.add(",机均").add(floor).add("-").add(ceil)
+                        m.add(",机均").add(floor).add("+")
                     }
                 }
                 if (arcade.cardUpdateTime == null) {
@@ -254,7 +255,8 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         if (floor == ceil) {
                             m.add(", 机均").add(floor).add(cardUnit).add("。").newLine()
                         } else {
-                            m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit).add("。").newLine()
+                            //m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit).add("。").newLine()
+                            m.add(", 机均").add(floor).add("+").add(cardUnit).add("。").newLine()
                         }
                     } else {
                         m.add("。").newLine()
@@ -406,7 +408,8 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         if (floor == ceil) {
                             m.add(", 机均").add(floor).add(cardUnit).add("。")
                         } else {
-                            m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit)
+                            //m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit)
+                            m.add(", 机均").add(floor).add("+").add(cardUnit)
                         }
                     }
                     sendGroupMsg(event, event.groupId, m.toString())
