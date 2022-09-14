@@ -54,6 +54,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
         Pattern.compile("^(.*)([+＋加\\-－减=＝])(\\d{1,6}|[零一两俩二三仨四五六七八九十+＋\\-－])([个张位])?([卡人神爷爹])?[\\s+]*(\\[CQ:at,qq=(\\d{1,12})\\])?$")
     private val whoPattern = Pattern.compile("^(.*)有谁[?？]?$")
     private val wherePattern = Pattern.compile("^(.*)在哪[?？]?$")
+    private val markClosePattern = Pattern.compile("^(.*)(停业|开业)$")
 
     companion object {
         private const val CACHE_NAME = "ArcadeCardQueue_NEW"
@@ -175,22 +176,26 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
             val m = MessageBuilder()
             m.add(ComponentReply(event.messageId))
             arcadeList.forEachIndexed { index, arcade ->
-                m.add(arcade.name).add(": ").add(arcade.cardNum).add("卡")
-                if (arcade.machineNum > 1 && arcade.cardNum != 0) {
-                    val average = arcade.cardNum.toFloat() / arcade.machineNum
-                    val floor = floor(average.toDouble()).toInt()
-                    val ceil = ceil(average.toDouble()).toInt()
-                    if (floor == ceil) {
-                        m.add(",机均").add(floor)
-                    } else {
-                        //m.add(",机均").add(floor).add("-").add(ceil)
-                        m.add(",机均").add(floor).add("+")
-                    }
-                }
-                if (arcade.cardUpdateTime == null) {
-                    m.add("(今日未更新) ")
+                if (arcade.close == 1) {
+                    m.add(arcade.name).add(": 停业中")
                 } else {
-                    m.add("(").add(DateUtil.format(arcade.cardUpdateTime, "HH:mm:ss")).add(") ")
+                    m.add(arcade.name).add(": ").add(arcade.cardNum).add("卡")
+                    if (arcade.machineNum > 1 && arcade.cardNum != 0) {
+                        val average = arcade.cardNum.toFloat() / arcade.machineNum
+                        val floor = floor(average.toDouble()).toInt()
+                        val ceil = ceil(average.toDouble()).toInt()
+                        if (floor == ceil) {
+                            m.add(",机均").add(floor)
+                        } else {
+                            //m.add(",机均").add(floor).add("-").add(ceil)
+                            m.add(",机均").add(floor).add("+")
+                        }
+                    }
+                    if (arcade.cardUpdateTime == null) {
+                        m.add("(今日未更新) ")
+                    } else {
+                        m.add("(").add(DateUtil.format(arcade.cardUpdateTime, "HH:mm:ss")).add(") ")
+                    }
                 }
                 if (index < arcadeList.size - 1) {
                     m.newLine()
@@ -247,29 +252,35 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         FeatureEnum.CARD_COUNTER_ESTER_EGG
                     )))
                 ) {
-                    m.add(arcade.name).add("现在").add(arcade.cardNum).add(cardUnit)
-                    if (arcade.machineNum!! > 1 && arcade.cardNum != 0) {
-                        val average = arcade.cardNum.toFloat() / arcade.machineNum
-                        val floor = floor(average.toDouble()).toInt()
-                        val ceil = ceil(average.toDouble()).toInt()
-                        if (floor == ceil) {
-                            m.add(", 机均").add(floor).add(cardUnit).add("。").newLine()
+                    if (arcade.close == 1) {
+                        m.add(arcade.name).add(" 被标记为停业中。").newLine()
+                            .add("群管可以输入\"").add(arcadeName).add("开业\"取消该标记。")
+                    } else {
+                        m.add(arcade.name).add("现在").add(arcade.cardNum).add(cardUnit)
+                        if (arcade.machineNum!! > 1 && arcade.cardNum != 0) {
+                            val average = arcade.cardNum.toFloat() / arcade.machineNum
+                            val floor = floor(average.toDouble()).toInt()
+                            val ceil = ceil(average.toDouble()).toInt()
+                            if (floor == ceil) {
+                                m.add(", 机均").add(floor).add(cardUnit).add("。").newLine()
+                            } else {
+                                //m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit).add("。").newLine()
+                                m.add(", 机均").add(floor).add("+").add(cardUnit).add("。").newLine()
+                            }
                         } else {
-                            //m.add(", 机均").add(floor).add("-").add(ceil).add(cardUnit).add("。").newLine()
-                            m.add(", 机均").add(floor).add("+").add(cardUnit).add("。").newLine()
+                            m.add("。").newLine()
                         }
-                    } else {
-                        m.add("。").newLine()
-                    }
-                    if (arcade.cardUpdateTime == null) {
-                        m.add("今日未更新。")
-                    } else {
-                        m.add("最后由 ").add(arcade.cardUpdateBy).add(" 更新于 ")
-                            .add(DateUtil.format(arcade.cardUpdateTime, "HH:mm:ss")).add("。")
-                    }
-                    if (!getArcadeGroupNumber(arcade).isEmpty()) {
-                        // 彩蛋不显示该提示
-                        m.newLine().add("加减" + cardUnit + "数请发送\"" + arcadeName + "++\"或\"" + arcadeName + "--\"")
+                        if (arcade.cardUpdateTime == null) {
+                            m.add("今日未更新。")
+                        } else {
+                            m.add("最后由 ").add(arcade.cardUpdateBy).add(" 更新于 ")
+                                .add(DateUtil.format(arcade.cardUpdateTime, "HH:mm:ss")).add("。")
+                        }
+                        if (!getArcadeGroupNumber(arcade).isEmpty()) {
+                            // 彩蛋不显示该提示
+                            m.newLine()
+                                .add("加减" + cardUnit + "数请发送\"" + arcadeName + "++\"或\"" + arcadeName + "--\"")
+                        }
                     }
                     sendGroupMsg(event, event.groupId, m.toString())
                     return
@@ -327,6 +338,13 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         FeatureEnum.CARD_COUNTER_ESTER_EGG
                     )))
                 ) {
+                    if (arcade.close == 1) {
+                        m.add(arcade.name).add(" 被标记为停业中。").newLine()
+                            .add("需要群管先输入\"").add(arcadeName).add("开业\"取消该标记, 然后才能加减卡。")
+                        sendGroupMsg(event, event.groupId, m.toString())
+                        return
+                    }
+
                     val operator =
                         if (event.groupSender.info.card.isNotEmpty()) event.groupSender.info.card else event.groupSender.info.nickname
                     val oldCardNum = arcade.cardNum
@@ -335,6 +353,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                             operateType = 3
                             setCard(arcade, number, operator)
                         }
+
                         "+", "＋", "加" -> {
                             if (number == 0) {
                                 return
@@ -464,6 +483,41 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
             //m.add("没这机厅");
             //this.sendGroupMsg(event, event.getGroupId(), m.toString());
         }
+
+        // 标记开业停业
+        arcadeName = ReUtil.get(markClosePattern, message, 1)
+        if (arcadeName != null) {
+            if (!event.isAdmin(event.senderId) && event.senderId != 694372459L) {
+                sendGroupMsg(event, event.groupId, MessageBuilder().add("此命令仅群管可以使用").toString())
+                return
+            }
+            val arcadeList = getArcadeList(event.groupId, false)
+            val m = MessageBuilder()
+            m.add(ComponentReply(event.messageId))
+            for (arcade in arcadeList) {
+                if ((arcade.name == arcadeName || getArcadeAlias(arcade).contains(arcadeName)) && (getArcadeGroupNumber(
+                        arcade
+                    ).contains(event.groupId) || (getArcadeGroupNumber(arcade).isEmpty() && featureService.isFeatureEnable(
+                        event.groupId,
+                        FeatureEnum.CARD_COUNTER_ESTER_EGG
+                    )))
+                ) {
+                    val operate = ReUtil.get(markClosePattern, message, 2)
+                    if (operate == "开业") {
+                        this.setClose(arcade, 0)
+                        m.add(arcade.name).add(" 已被标记为开业, 可以正常加减卡了。")
+                    } else {
+                        this.setClose(arcade, 1)
+                        m.add(arcade.name).add(" 已被标记为停业, 群员查卡或加减卡时会收到提示。")
+                    }
+                    sendGroupMsg(event, event.groupId, m.toString())
+                    saveArcadeList(arcadeList)
+                    return
+                }
+            }
+            //m.add("没这机厅");
+            //this.sendGroupMsg(event, event.getGroupId(), m.toString());
+        }
     }
 
     private fun numberStrToInt(numberStr: String?): Int {
@@ -519,12 +573,17 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
 
     private fun addCard(arcade: Arcade, num: Int, updateBy: String) {
         ArcadeQueueCardUtil.addCard(arcade, num, updateBy)
-        updateDatabase(arcade, arcade.cardNum, updateBy)
+        updateDatabase(arcade, arcade.cardNum, updateBy, arcade.close)
     }
 
     private fun setCard(arcade: Arcade, num: Int, updateBy: String) {
         ArcadeQueueCardUtil.setCard(arcade, num, updateBy)
-        updateDatabase(arcade, num, updateBy)
+        updateDatabase(arcade, num, updateBy, arcade.close)
+    }
+
+    private fun setClose(arcade: Arcade, close: Int) {
+        ArcadeQueueCardUtil.setClose(arcade, close)
+        updateDatabase(arcade, arcade.cardNum, arcade.cardUpdateBy, close)
     }
 
     private fun getArcadeAlias(arcade: Arcade): List<String> {
@@ -535,13 +594,14 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
         return ArcadeQueueCardUtil.getArcadeGroupNumber(arcade)
     }
 
-    private fun updateDatabase(arcade: Arcade, num: Int, updateBy: String) {
+    private fun updateDatabase(arcade: Arcade, num: Int, updateBy: String, close: Int) {
         ThreadUtil.execute {
             val update = Arcade()
             update.id = arcade.id
             update.cardNum = num
             update.cardUpdateBy = updateBy
             update.cardUpdateTime = Date()
+            update.close = close
             arcadeDao.updateById(update)
         }
     }

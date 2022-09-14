@@ -114,6 +114,12 @@ public class Arcade extends RichEntity {
   )
   private Integer enable;
 
+  @TableField(
+          value = "close",
+          desc = "是否闭店中(0/否 1/是)"
+  )
+  private Integer close;
+
   public Integer getId() {
     return this.id;
   }
@@ -252,5 +258,13 @@ public class Arcade extends RichEntity {
   @Override
   public final Class entityClass() {
     return Arcade.class;
+  }
+
+  public Integer getClose() {
+    return close;
+  }
+
+  public void setClose(Integer close) {
+    this.close = close;
   }
 }

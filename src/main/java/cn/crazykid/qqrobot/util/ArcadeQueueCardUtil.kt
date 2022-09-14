@@ -21,6 +21,10 @@ object ArcadeQueueCardUtil {
         arcade.cardUpdateTime = Date()
     }
 
+    fun setClose(arcade: Arcade, close: Int) {
+        arcade.close = close
+    }
+
     fun getArcadeAlias(arcade: Arcade): List<String> {
         return JSON.parseArray(arcade.aliasJson, String::class.java)
     }
