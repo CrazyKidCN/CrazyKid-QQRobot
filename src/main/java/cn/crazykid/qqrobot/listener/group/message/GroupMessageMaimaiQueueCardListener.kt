@@ -495,12 +495,9 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
             val m = MessageBuilder()
             m.add(ComponentReply(event.messageId))
             for (arcade in arcadeList) {
-                if ((arcade.name == arcadeName || getArcadeAlias(arcade).contains(arcadeName)) && (getArcadeGroupNumber(
+                if ((arcade.name == arcadeName || getArcadeAlias(arcade).contains(arcadeName)) && getArcadeGroupNumber(
                         arcade
-                    ).contains(event.groupId) || (getArcadeGroupNumber(arcade).isEmpty() && featureService.isFeatureEnable(
-                        event.groupId,
-                        FeatureEnum.CARD_COUNTER_ESTER_EGG
-                    )))
+                    ).contains(event.groupId)
                 ) {
                     val operate = ReUtil.get(markClosePattern, message, 2)
                     if (operate == "开业") {
@@ -594,14 +591,20 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
         return ArcadeQueueCardUtil.getArcadeGroupNumber(arcade)
     }
 
-    private fun updateDatabase(arcade: Arcade, num: Int, updateBy: String, close: Int) {
+    private fun updateDatabase(arcade: Arcade, num: Int?, updateBy: String?, close: Int?) {
         ThreadUtil.execute {
             val update = Arcade()
             update.id = arcade.id
-            update.cardNum = num
-            update.cardUpdateBy = updateBy
-            update.cardUpdateTime = Date()
-            update.close = close
+            if (num != null) {
+                update.cardNum = num
+            }
+            if (updateBy.isNullOrBlank()) {
+                update.cardUpdateBy = updateBy
+                update.cardUpdateTime = Date()
+            }
+            if (close != null) {
+                update.close = close
+            }
             arcadeDao.updateById(update)
         }
     }
