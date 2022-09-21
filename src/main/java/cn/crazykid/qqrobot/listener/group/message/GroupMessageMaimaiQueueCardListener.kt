@@ -487,10 +487,6 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
         // 标记开业停业
         arcadeName = ReUtil.get(markClosePattern, message, 1)
         if (arcadeName != null) {
-            if (!event.isAdmin(event.senderId) && event.senderId != 694372459L) {
-                sendGroupMsg(event, event.groupId, MessageBuilder().add("此命令仅群管可以使用").toString())
-                return
-            }
             val arcadeList = getArcadeList(event.groupId, false)
             val m = MessageBuilder()
             m.add(ComponentReply(event.messageId))
@@ -499,6 +495,10 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         arcade
                     ).contains(event.groupId)
                 ) {
+                    if (!event.isAdmin(event.senderId) && event.senderId != 694372459L) {
+                        sendGroupMsg(event, event.groupId, MessageBuilder().add("此命令仅群管可以使用").toString())
+                        return
+                    }
                     val operate = ReUtil.get(markClosePattern, message, 2)
                     if (operate == "开业") {
                         this.setClose(arcade, 0)
