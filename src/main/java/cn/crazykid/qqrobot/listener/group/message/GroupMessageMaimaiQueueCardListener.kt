@@ -496,7 +496,7 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                     ).contains(event.groupId)
                 ) {
                     if (!event.isAdmin(event.senderId) && event.senderId != 694372459L) {
-                        sendGroupMsg(event, event.groupId, MessageBuilder().add("此命令仅群管可以使用").toString())
+                        sendGroupMsg(event, event.groupId, m.add("此命令仅群管可以使用").toString())
                         return
                     }
                     val operate = ReUtil.get(markClosePattern, message, 2)
