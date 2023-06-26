@@ -85,13 +85,14 @@ object MaimaiNetCNDataCatcherTest {
         13: 舞萌DX
         15: 舞萌DX 2021
         17: 舞萌DX 2022
+        19: 舞萌DX 2023
          */
 
         // 因为有时候获取歌曲详情会失败, 所以一直遍历直到全部歌曲详情都获取成功为止.
 
         try {
-            for (version in 0..17) {
-                if (version == 14 || version == 16) {
+            for (version in 0..19) {
+                if (version == 14 || version == 16 || version == 18) {
                     continue
                 }
                 finished = false
@@ -208,6 +209,7 @@ object MaimaiNetCNDataCatcherTest {
                 14 -> "其它"
                 15 -> "舞萌DX 2021"
                 17 -> "舞萌DX 2022"
+                19 -> "舞萌DX 2023"
                 else -> "未知"
             }
 
@@ -333,7 +335,7 @@ object MaimaiNetCNDataCatcherTest {
 
         // 保存刷新后的cookie以便下次调用
         val cookies = resp.multiHeaders()["Set-Cookie"]
-        if (cookies!!.size < 2) {
+        if (cookies!!.size < 1) {
             //throw RuntimeException("刷新cookie失败! 检查初始cookie是否正确!")
             println("刷新cookie失败! 5s后递归尝试...")
             Thread.sleep(5000)
