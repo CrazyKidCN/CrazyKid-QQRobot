@@ -453,7 +453,11 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                         FeatureEnum.CARD_COUNTER_ESTER_EGG
                     )))
                 ) {
-                    m.add(arcade.address)
+                    if (arcade.address.isNotEmpty()) {
+                        m.add(arcade.address)
+                    } else {
+                        m.add("未配置该机厅地址, 可联系bot主配置")
+                    }
                     sendGroupMsg(event, event.groupId, m.toString())
                     return
                 }
