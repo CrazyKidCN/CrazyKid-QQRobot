@@ -73,7 +73,7 @@ class MaimaiMusicDataServiceImpl : IMaimaiMusicDataService {
                 // ignored
             }
         }
-        if (FileUtil.exist(divingFishMaimaiMusicDataPath)) {
+        if (FileUtil.exist(xrayMaimaiMusicAliasPath)) {
             // 如果此前已拉取过, 则异步执行更新, 避免初始化卡进程
             ThreadUtil.execute(updateXrayMaimaiMusicAliasTask);
         } else {
@@ -111,8 +111,15 @@ class MaimaiMusicDataServiceImpl : IMaimaiMusicDataService {
             forEach { aliasName, musicIdList ->
                 val list = musicIdList as JSONArray
                 for (musicIdObj in list) {
-                    val musicId = musicIdObj.toString().toLong()
-                    val musicData = (DIVING_FISH_MAIMAI_MUSIC_DATA as MutableList<DivingFishMaimaiMusicData>?)?.filter {
+                    val musicIdStr = musicIdObj.toString()
+                    var musicId: Long
+                    try {
+                        musicId = musicIdStr.toLong()
+                    } catch (e: Exception) {
+                        // xray 的别名 json 里可能出现 id 为"未找到"的数据, 转化类型会报错
+                        continue
+                    }
+                    val musicData = DIVING_FISH_MAIMAI_MUSIC_DATA?.filter {
                         it.id == musicId
                     }
                     if (!musicData.isNullOrEmpty()) {
