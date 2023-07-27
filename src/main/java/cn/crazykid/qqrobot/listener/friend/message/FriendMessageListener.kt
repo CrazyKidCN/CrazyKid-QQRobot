@@ -14,5 +14,9 @@ class FriendMessageListener : IcqListener() {
         // 通知号主
         //event.getHttpApi().sendPrivateMsg(694372459L, event.getSender().getInfo().getNickname() +
         //        "(" +  event.getSenderId() + "): " + event.getRawMessage());
+
+        if (event.message == "在吗") {
+            event.httpApi.sendPrivateMsg(event.sender.id, "1")
+        }
     }
 }
