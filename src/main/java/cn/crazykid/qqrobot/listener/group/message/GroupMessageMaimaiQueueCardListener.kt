@@ -382,13 +382,13 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                     saveArcadeList(arcadeList)
 
                     // 牛bot兼容卡数修正
-                    if (event.groupId == 437189122L && (reGroup[5] == null || "卡" != reGroup[5])) {
-                        if (operateType == 1 || operateType == 2) {
-                            val mb = MessageBuilder()
-                            mb.add(arcadeName).add(if (operateType == 1) "+" else "-").add(number).add("卡")
-                            event.httpApi.sendGroupMsg(event.groupId, mb.toString())
-                        }
-                    }
+//                    if (event.groupId == 437189122L && (reGroup[5] == null || "卡" != reGroup[5])) {
+//                        if (operateType == 1 || operateType == 2) {
+//                            val mb = MessageBuilder()
+//                            mb.add(arcadeName).add(if (operateType == 1) "+" else "-").add(number).add("卡")
+//                            event.httpApi.sendGroupMsg(event.groupId, mb.toString())
+//                        }
+//                    }
                     if (oldCardNum != arcade.cardNum) {
                         m.add("更新成功! ")
                         if (operateType == 3) {
