@@ -14,7 +14,6 @@ import cn.crazykid.qqrobot.listener.group.message.GroupMessageCounterListener.Co
 import cn.crazykid.qqrobot.service.IFeatureService
 import cn.crazykid.qqrobot.util.ArcadeQueueCardUtil
 import cn.hutool.core.date.DateUtil
-import cn.hutool.core.lang.Console
 import cn.hutool.core.thread.ThreadUtil
 import cn.hutool.core.util.ReUtil
 import com.alibaba.fastjson.JSON
@@ -63,11 +62,11 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
 
     @SneakyThrows
     private fun getArcadeList(groupNumber: Long, isReload: Boolean): List<Arcade> {
-        Console.log("获取机厅列表...")
+        //Console.log("获取机厅列表...")
         val arcadeList: List<Arcade>
         val json: String? = jedis[CACHE_NAME]
         if (json.isNullOrBlank()) {
-            Console.log("从db获取..")
+            //Console.log("从db获取..")
             arcadeList = arcadeDao.selectEnableArcades()
             for (arcade in arcadeList) {
                 if (!isReload) {
@@ -75,11 +74,11 @@ class GroupMessageMaimaiQueueCardListener : IcqListener() {
                     arcade.cardUpdateBy = null
                     arcade.cardUpdateTime = null
                 }
-                Console.log("载入机厅 {}", arcade.name)
+                //Console.log("载入机厅 {}", arcade.name)
             }
             jedis.setex(CACHE_NAME, cacheExpireSecond, JSON.toJSONString(arcadeList))
         } else {
-            Console.log("从redis中获取..")
+            //Console.log("从redis中获取..")
             arcadeList = JSON.parseArray(json, Arcade::class.java)
         }
 

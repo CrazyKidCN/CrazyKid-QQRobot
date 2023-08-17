@@ -16,4 +16,14 @@ interface IMaimaiMusicDataService {
      * 根据歌曲标题获取歌曲别名列表
      */
     fun getAliasByMusicTitle(title: String): List<String>?
+
+    /**
+     * 关键字查歌
+     */
+    fun searchSong(keyword: String): String
+
+    /**
+     * 根据水鱼id获取歌曲信息文本
+     */
+    fun getSongInfoStr(id: Long): String
 }
