@@ -29,6 +29,14 @@ object ArcadeQueueCardUtil {
         return JSON.parseArray(arcade.aliasJson, String::class.java)
     }
 
+    fun getArcadeGroupNames(arcade: Arcade): List<String> {
+        try {
+            return JSON.parseArray(arcade.groupName, String::class.java)
+        } catch (e: Exception) {
+            return Collections.emptyList()
+        }
+    }
+
     fun getArcadeGroupNumber(arcade: Arcade): List<Long> {
         return JSON.parseArray(arcade.groupNumberJson, Long::class.java)
     }

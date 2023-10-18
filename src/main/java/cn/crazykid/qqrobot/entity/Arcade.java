@@ -64,6 +64,18 @@ public class Arcade extends RichEntity {
   private String groupNumberJson;
 
   @TableField(
+          value = "group_index",
+          desc = "分组序号,从1开始"
+  )
+  private Integer groupIndex;
+
+  @TableField(
+          value = "group_name",
+          desc = "分组名称"
+  )
+  private String groupName;
+
+  @TableField(
           value = "card_num",
           desc = "当前卡数"
   )
@@ -183,6 +195,24 @@ public class Arcade extends RichEntity {
     return this;
   }
 
+  public Integer getGroupIndex() {
+    return this.groupIndex;
+  }
+
+  public Arcade setGroupIndex(Integer groupIndex) {
+    this.groupIndex = groupIndex;
+    return this;
+  }
+
+  public String getGroupName() {
+    return this.groupName;
+  }
+
+  public Arcade setGroupName(String groupName) {
+    this.groupName = groupName;
+    return this;
+  }
+
   public Integer getCardNum() {
     return this.cardNum;
   }
@@ -255,16 +285,17 @@ public class Arcade extends RichEntity {
     return this;
   }
 
+  public Integer getClose() {
+    return this.close;
+  }
+
+  public Arcade setClose(Integer close) {
+    this.close = close;
+    return this;
+  }
+
   @Override
   public final Class entityClass() {
     return Arcade.class;
-  }
-
-  public Integer getClose() {
-    return close;
-  }
-
-  public void setClose(Integer close) {
-    this.close = close;
   }
 }

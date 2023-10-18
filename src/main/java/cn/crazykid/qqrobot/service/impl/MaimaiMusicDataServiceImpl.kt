@@ -75,7 +75,7 @@ class MaimaiMusicDataServiceImpl : IMaimaiMusicDataService {
                 // 拉取数据存储本地
                 HttpUtil.downloadFileFromUrl(xrayAliasApi, xrayMaimaiMusicAliasPath)
                 println("xrayMaimaiMusicAlias Update Success")
-            } catch (ignored: Exception) {
+            } catch (ignorded: Exception) {
                 // ignored
             }
         }
